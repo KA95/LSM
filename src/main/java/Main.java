@@ -1,30 +1,44 @@
 import calculation.advanced.Triangulation;
+import calculation.basic.Point;
 import calculation.basic.Point2D;
+import calculation.basic.Triangle;
 import calculation.basic.Triangle2D;
 import drawing.ConcreteAnalysis;
 import org.jzy3d.analysis.AnalysisLauncher;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 public class Main {
-    static final int TRIANGULATION_DEGREE = 0;
+    private static final int TRIANGULATION_DEGREE = 6;
+    private static final int DATA_DEGREE = 6;
+    private static final double TOP = 3;
+    private static final double BOTTOM = -3;
+    private static final double RIGHT = 3;
+    private static final double LEFT = -3;
 
     public static void main(String[] args) throws Exception {
+        Map<Point2D, Double> inputData = initDataPoints();
         Triangulation triangulation = initTriangulation();
         triangulation.rebuildVertices();
         for (int i = 0; i < 2 * TRIANGULATION_DEGREE; i++) {
             triangulation.fullSplitting();
         }
-        System.out.println(triangulation.getTriangles().size());
         ConcreteAnalysis concreteAnalysis = new ConcreteAnalysis();
         concreteAnalysis.setTriangulation(triangulation);
+        concreteAnalysis.setDataPoints(inputData);
+        concreteAnalysis.setApproximation(buildApproximation(inputData, triangulation));
         AnalysisLauncher.open(concreteAnalysis);
     }
 
     private static Triangulation initTriangulation() {
         Point2D p0 = new Point2D(0, 0);
-        Point2D p1 = new Point2D(1, 1);
-        Point2D p2 = new Point2D(1, -1);
-        Point2D p3 = new Point2D(-1, -1);
-        Point2D p4 = new Point2D(-1, 1);
+        Point2D p1 = new Point2D(3, 3);
+        Point2D p2 = new Point2D(3, -3);
+        Point2D p3 = new Point2D(-3, -3);
+        Point2D p4 = new Point2D(-3, 3);
 
         Triangulation tr = new Triangulation();
         tr.addTriangle(new Triangle2D(p0, p1, p2));
@@ -33,4 +47,40 @@ public class Main {
         tr.addTriangle(new Triangle2D(p0, p4, p1));
         return tr;
     }
+
+    private static Map<Point2D, Double> initDataPoints() {
+        int count = (int) Math.pow(2, DATA_DEGREE);
+        double step = (TOP - BOTTOM)/Math.pow(2, DATA_DEGREE);
+        Map<Point2D, Double> result = new TreeMap<Point2D, Double>();
+        for(int i = 0; i<=count; i++ ) {
+            for (int j = 0; j <= count; j++) {
+                double x,y;
+                x = LEFT +step * i;
+                y = BOTTOM +step * j;
+                result.put(new Point2D(x, y), f(x, y));
+            }
+        }
+        return result;
+    }
+
+    private static List<Triangle> buildApproximation(Map<Point2D, Double> inputData, Triangulation triangulation) {
+        List<Triangle> result = new ArrayList<Triangle>();
+        for(Triangle2D t : triangulation.getTriangles()) {
+            Point p1,p2,p3;
+            p1 = new Point(t.getP1());
+            p2 = new Point(t.getP2());
+            p3 = new Point(t.getP3());
+            p1.setZ(inputData.get(t.getP1()));
+            p2.setZ(inputData.get(t.getP2()));
+            p3.setZ(inputData.get(t.getP2()));
+            Triangle newT = new Triangle(p1,p2,p3);
+            result.add(newT);
+        }
+        return result;
+
+    }
+    private static double f(double x, double y) {
+        return x * Math.sin(x * y);
+    }
+
 }

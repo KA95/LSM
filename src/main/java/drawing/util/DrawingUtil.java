@@ -11,10 +11,7 @@ import org.jzy3d.maths.Coord3d;
 import org.jzy3d.plot3d.primitives.Point;
 import org.jzy3d.plot3d.primitives.Polygon;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 
 public class DrawingUtil {
@@ -23,6 +20,14 @@ public class DrawingUtil {
         ArrayList<Polygon> result = new ArrayList<Polygon>();
         for (Triangle2D t : tr.getTriangles()) {
             result.add(createTriangle(new Triangle(t)));
+        }
+        return result;
+    }
+
+    public static List<Polygon> createApproximation(List<Triangle> triangles) {
+        ArrayList<Polygon> result = new ArrayList<Polygon>();
+        for (Triangle t : triangles) {
+            result.add(createTriangle(t));
         }
         return result;
     }
@@ -41,6 +46,16 @@ public class DrawingUtil {
         return result;
     }
 
+    public static List<calculation.basic.Point> createInputDataPoints(Map<Point2D,Double> points) {
+        ArrayList<calculation.basic.Point> result = new ArrayList<calculation.basic.Point>();
+        for (Map.Entry<Point2D, Double> entry : points.entrySet()) {
+            result.add(new calculation.basic.Point(entry.getKey().getX(), entry.getKey().getY(), entry.getValue()));
+        }
+        return result;
+    }
+
+
+
     public static Polygon createTriangle(Triangle tr) {
         return createTriangle(coordFromPoint(tr.getP1()), coordFromPoint(tr.getP2()), coordFromPoint(tr.getP3()));
     }
@@ -50,8 +65,7 @@ public class DrawingUtil {
         polygon.add(new Point(p1));
         polygon.add(new Point(p2));
         polygon.add(new Point(p3));
-        Random random = new Random();
-        polygon.setColor(new Color(random.nextFloat(), random.nextFloat(), random.nextFloat(), 0.2f));
+        polygon.setColor(new Color(1f, 1f, 1f, 0.2f));
         polygon.setWireframeColor(Color.BLACK);
         return polygon;
     }
