@@ -2,7 +2,7 @@ package calculation.basic;
 
 import calculation.util.CalculationUtil;
 
-public class Point implements Comparable<Point> {
+public class Point {
     private double x,y,z;
 
     public double getX() {
@@ -35,12 +35,11 @@ public class Point implements Comparable<Point> {
         this.z = z;
     }
 
-    public Point(double x, double y) {
-        this.x = x;
-        this.y = y;
+    public Point(Point2D p) {
+        this.x = p.getX();
+        this.y = p.getY();
         this.z = 0;
     }
-
     @Override
     public boolean equals(Object o) {
         if(o instanceof Point) {
@@ -69,12 +68,7 @@ public class Point implements Comparable<Point> {
         return result;
     }
 
-    @Override
-    public int compareTo(Point o) {
-        if(!CalculationUtil.equals(x,o.getX()))
-            return Double.compare(x,o.getX());
-        if(!CalculationUtil.equals(y,o.getY()))
-            return Double.compare(y,o.getY());
-        return Double.compare(x,o.getX());
+    public Point minus(Point p) {
+        return new Point(x - p.getX(),y - p.getY(), z - p.getZ());
     }
 }
