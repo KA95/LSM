@@ -2,7 +2,7 @@ package calculation.basic;
 
 import calculation.util.CalculationUtil;
 
-public class Point {
+public class Point implements Comparable<Point> {
     private double x,y,z;
 
     public double getX() {
@@ -59,5 +59,22 @@ public class Point {
         result += String.format("y : %f\n",y);
         result += String.format("z : %f\n",z);
         return result;
+    }
+
+    public String shortString() {
+        String result = "";
+        result += String.format("x : %f\t",x);
+        result += String.format("y : %f\t",y);
+        result += String.format("z : %f\t",z);
+        return result;
+    }
+
+    @Override
+    public int compareTo(Point o) {
+        if(!CalculationUtil.equals(x,o.getX()))
+            return Double.compare(x,o.getX());
+        if(!CalculationUtil.equals(y,o.getY()))
+            return Double.compare(y,o.getY());
+        return Double.compare(x,o.getX());
     }
 }

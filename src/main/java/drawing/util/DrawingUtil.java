@@ -1,6 +1,6 @@
 package drawing.util;
 
-import calculation.Triangulation;
+import calculation.advanced.Triangulation;
 import calculation.basic.Triangle;
 import org.jzy3d.colors.Color;
 import org.jzy3d.maths.Coord3d;
