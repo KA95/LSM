@@ -30,11 +30,9 @@ public class Triangulation {
     public void rebuildVertices() {
         vertices = new TreeMap<Point2D, PyramidalFunction>();
         for(Triangle2D t : triangles) {
-
             updatePyramidalFunctionP1(t);
             updatePyramidalFunctionP2(t);
             updatePyramidalFunctionP3(t);
-
         }
     }
 

@@ -3,7 +3,7 @@ package calculation.basic;
 import calculation.util.CalculationUtil;
 
 /**
- * Created by Lenovo on 10.12.2015.
+ * Created by Anton KLimansky on 10.12.2015.
  */
 public class LinearFunction {
     double A, B, C, D;
