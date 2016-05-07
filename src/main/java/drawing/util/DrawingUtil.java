@@ -36,17 +36,17 @@ public class DrawingUtil {
         ArrayList<Polygon> result = new ArrayList<Polygon>();
         for (PyramidalFunction function : functionSet) {
             for (Triangle t : function.getParts()) {
-                Point2D p = new Point2D((t.getP1().getX() +t.getP2().getX() + t.getP3().getX())/3,
-                        (t.getP1().getY() +t.getP2().getY() + t.getP3().getY())/3);
+                Point2D p = new Point2D((t.getP1().getX() + t.getP2().getX() + t.getP3().getX()) / 3,
+                        (t.getP1().getY() + t.getP2().getY() + t.getP3().getY()) / 3);
                 LinearFunction lf = new LinearFunction(t);
-                points.add(new calculation.basic.Point(p.getX(), p.getY(), lf.calculateZ(p.getX(),p.getY())));
+                points.add(new calculation.basic.Point(p.getX(), p.getY(), lf.calculateZ(p.getX(), p.getY())));
                 result.add(createTriangle(t));
             }
         }
         return result;
     }
 
-    public static List<calculation.basic.Point> createInputDataPoints(Map<Point2D,Double> points) {
+    public static List<calculation.basic.Point> createInputDataPoints(Map<Point2D, Double> points) {
         ArrayList<calculation.basic.Point> result = new ArrayList<calculation.basic.Point>();
         for (Map.Entry<Point2D, Double> entry : points.entrySet()) {
             result.add(new calculation.basic.Point(entry.getKey().getX(), entry.getKey().getY(), entry.getValue()));
@@ -54,10 +54,15 @@ public class DrawingUtil {
         return result;
     }
 
-
-
     public static Polygon createTriangle(Triangle tr) {
         return createTriangle(coordFromPoint(tr.getP1()), coordFromPoint(tr.getP2()), coordFromPoint(tr.getP3()));
+    }
+
+    public static Polygon createLine(Coord3d p1, Coord3d p2) {
+        System.out.println("DrawingUtil.createLine");
+        System.out.println("p1 = {" + p1.x + ", "+ p1.y + ", "+ p1.z + "}");
+        System.out.println("p2 = {" + p2.x + ", "+ p2.y + ", "+ p2.z + "}");
+        return createTriangle(p1, p2, p2);
     }
 
     public static Polygon createTriangle(Coord3d p1, Coord3d p2, Coord3d p3) {
@@ -65,7 +70,7 @@ public class DrawingUtil {
         polygon.add(new Point(p1));
         polygon.add(new Point(p2));
         polygon.add(new Point(p3));
-        polygon.setColor(new Color(1f, 1f, 1f, 0.2f));
+        polygon.setColor(new Color(0f, 1f, 1f, 0.2f));
         polygon.setWireframeColor(Color.BLACK);
         return polygon;
     }

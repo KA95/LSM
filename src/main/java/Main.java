@@ -98,8 +98,8 @@ public class Main {
      * @return z-coordinate
      */
     private static double f(double x, double y) {
-//        return x * Math.sin(x * y);
-        return Math.random() > 0.5 ? 1 : 0;
+        return x * Math.sin(x * y);
+//        return Math.random() > 0.5 ? 1 : 0;
     }
 
 }
