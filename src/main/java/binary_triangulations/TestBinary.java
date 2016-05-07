@@ -26,8 +26,10 @@ public class TestBinary {
         BinaryTriangulation triangulation = new BinaryTriangulation(LEFT, BOTTOM, RIGHT, TOP);
         btAnalysis.setTriangulation(triangulation);
         AnalysisLauncher.open(btAnalysis);
-//        Thread.sleep(2000);
-//        triangulation.refine(1,1,1);
+        Thread.sleep(2000);
+        triangulation.activate1(new DiscretePoint(9,5,4));
+        btAnalysis.updateTriangulation(triangulation);
+        System.out.println();
 //        btAnalysis.updateTriangulation(triangulation);
 
 //        testDynamicAddingPoints(points, btAnalysis);

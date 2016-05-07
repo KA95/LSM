@@ -53,6 +53,10 @@ public class BinaryTriangulation {
         rebuildShape();
     }
 
+    /**
+     * Rebuild drawable shape.
+     * Call it before drawing if triangulation was changed.
+     */
     public void rebuildShape() {
         List<Polygon> lines = new ArrayList<Polygon>();
         for (DiscretePointDetailed point : activePoints.values()) {
@@ -76,49 +80,99 @@ public class BinaryTriangulation {
     }
 
     //todo: make private
-    public void refine(int x, int y, int k) {
-        // todo: all
-
-        rebuildShape();
+    public DiscretePointDetailed activate1(DiscretePoint point) {
+        System.out.println("point = " + point);
+        point.normalize();
+        List<DiscretePoint> parentPoints = getParents1(point.x, point.y, point.k);
+        List<DiscretePointDetailed> parents = new ArrayList<DiscretePointDetailed>();
+        for (DiscretePoint parentPoint : parentPoints) {
+            System.out.println("parent : " + parentPoint);
+            parentPoint.normalize();
+            DiscretePointDetailed parentDetailed = activePoints.containsKey(parentPoint)
+                    ? activePoints.get(parentPoint)
+                    : activate2(parentPoint);
+            parents.add(parentDetailed);
+        }
+        DiscretePointDetailed newPoint = new DiscretePointDetailed(point, parents);
+        activePoints.put(newPoint.point, newPoint);
+        return newPoint;
     }
 
-//    private void activate
-
-    @AllArgsConstructor
-    private class DiscretePoint {
-        int x;
-
-        int y;
-
-        //power of grid
-        int k;
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            DiscretePoint point = (DiscretePoint) o;
-
-            return x == point.x && y == point.y && k == point.k;
-
+    private DiscretePointDetailed activate2(DiscretePoint point) {
+        point.normalize();
+        List<DiscretePoint> parentPoints = getParents2(point.x, point.y, point.k);
+        List<DiscretePointDetailed> parents = new ArrayList<DiscretePointDetailed>();
+        for (DiscretePoint parentPoint : parentPoints) {
+            System.out.println("parent : " + parentPoint);
+            parentPoint.normalize();
+            DiscretePointDetailed parentDetailed = activePoints.containsKey(parentPoint)
+                    ? activePoints.get(parentPoint)
+                    : activate1(parentPoint);
+            parents.add(parentDetailed);
         }
+        DiscretePointDetailed newPoint = new DiscretePointDetailed(point, parents);
+        activePoints.put(newPoint.point, newPoint);
+        return newPoint;
+    }
 
-        @Override
-        public int hashCode() {
-            int result = x;
-            result = 31 * result + y;
-            result = 31 * result + k;
-            return result;
-        }
-
-        public void normalize() {
-            while (k > 0 && ((x | y) & 1) == 0) { //x%2 == 0 and y%2 == 0
-                x = x >> 1;
-                y = y >> 1;
-                k--;
+    private List<DiscretePoint> getParents1(int x, int y, int k) {
+        List<Integer> xList = getParentCoordinateList1(x, k);
+        List<Integer> yList = getParentCoordinateList1(y, k);
+        List<DiscretePoint> parents = new ArrayList<DiscretePoint>();
+        for (int px : xList) {
+            for (int py : yList) {
+                parents.add(new DiscretePoint(px, py, k - 1));
             }
         }
+        return parents;
+    }
+
+    private List<DiscretePoint> getParents2(int x, int y, int k) {
+        List<Integer> xList = getParentCoordinateList2(x, k);
+        List<Integer> yList = getParentCoordinateList2(y, k);
+        List<DiscretePoint> parents = new ArrayList<DiscretePoint>();
+        for (int px : xList) {
+            parents.add(new DiscretePoint(px, y, k));
+        }
+        for (int py : yList) {
+            parents.add(new DiscretePoint(x, py, k));
+        }
+
+        return parents;
+    }
+
+    private List<Integer> getParentCoordinateList1(int c, int k) {
+        List<Integer> yList = new ArrayList<Integer>();
+
+        int parentY = (c - 1) / 2;
+        if (inBounds(parentY, k - 1)) {
+            yList.add(parentY);
+        }
+
+        parentY = (c + 1) / 2;
+        if (inBounds(parentY, k - 1)) {
+            yList.add(parentY);
+        }
+        return yList;
+    }
+
+    private List<Integer> getParentCoordinateList2(int c, int k) {
+        List<Integer> yList = new ArrayList<Integer>();
+
+        int parentY = (c - 1);
+        if (inBounds(parentY, k)) {
+            yList.add(parentY);
+        }
+
+        parentY = (c + 1);
+        if (inBounds(parentY, k)) {
+            yList.add(parentY);
+        }
+        return yList;
+    }
+
+    private boolean inBounds(int c, int k) {
+        return c >= 0 && c <= 1 << k;
     }
 
     @AllArgsConstructor
@@ -128,7 +182,7 @@ public class BinaryTriangulation {
         List<DiscretePointDetailed> parents;
 
         public DiscretePointDetailed(int x, int y, int k, List<DiscretePointDetailed> parents) {
-            this.point = new DiscretePoint(x,y,k);
+            this.point = new DiscretePoint(x, y, k);
             this.parents = parents;
         }
 
@@ -138,3 +192,4 @@ public class BinaryTriangulation {
         }
     }
 }
+

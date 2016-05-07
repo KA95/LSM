@@ -28,6 +28,7 @@ public class BTAnalysis extends AbstractAnalysis {
     public void updateTriangulation(BinaryTriangulation triangulation) {
         chart.removeDrawable(triangulation.getShape());
         this.triangulation = triangulation;
+        triangulation.rebuildShape();
         draw(triangulation.getShape());
         chart.updateProjectionsAndRender();
     }
