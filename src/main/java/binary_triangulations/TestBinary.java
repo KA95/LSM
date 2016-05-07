@@ -27,12 +27,8 @@ public class TestBinary {
         btAnalysis.setTriangulation(triangulation);
         AnalysisLauncher.open(btAnalysis);
         Thread.sleep(2000);
-        triangulation.activate1(new DiscretePoint(9,5,4));
+        triangulation.activate(new DiscretePoint(9,5,4), BinaryTriangulation.ActivationType.FIRST);
         btAnalysis.updateTriangulation(triangulation);
-        System.out.println();
-//        btAnalysis.updateTriangulation(triangulation);
-
-//        testDynamicAddingPoints(points, btAnalysis);
     }
 
     private static void testDynamicAddingPoints(List<Point2D> points, BTAnalysis btAnalysis) throws Exception {

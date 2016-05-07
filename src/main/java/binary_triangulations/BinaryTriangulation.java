@@ -59,14 +59,20 @@ public class BinaryTriangulation {
      */
     public void rebuildShape() {
         List<Polygon> lines = new ArrayList<Polygon>();
+        int v = 0;
+        int e = 0;
         for (DiscretePointDetailed point : activePoints.values()) {
+            v++;
             if (point.parents != null) {
                 for (DiscretePointDetailed parent : point.parents) {
+                    e++;
                     lines.add(DrawingUtil.createLine(point.getCoordinates(), parent.getCoordinates()));
                 }
             }
         }
         shape = new Shape(lines);
+        System.out.println("e = " + e);
+        System.out.println("v = " + v);
     }
 
     /**
@@ -76,38 +82,36 @@ public class BinaryTriangulation {
      * @param y coordinate
      */
     public void refine(double x, double y) {
-        //should be reduced to refine(x,y,k)
+        //should be reduced to activate(...)
     }
 
+
+    /** Activate points recursively with saving triangulation correctness.
+     *
+     * @param point point to activate
+     * @param type activation type
+     * @return new point of triangulation
+     */
     //todo: make private
-    public DiscretePointDetailed activate1(DiscretePoint point) {
-        System.out.println("point = " + point);
+    public DiscretePointDetailed activate(DiscretePoint point, ActivationType type) {
         point.normalize();
-        List<DiscretePoint> parentPoints = getParents1(point.x, point.y, point.k);
-        List<DiscretePointDetailed> parents = new ArrayList<DiscretePointDetailed>();
-        for (DiscretePoint parentPoint : parentPoints) {
-            System.out.println("parent : " + parentPoint);
-            parentPoint.normalize();
-            DiscretePointDetailed parentDetailed = activePoints.containsKey(parentPoint)
-                    ? activePoints.get(parentPoint)
-                    : activate2(parentPoint);
-            parents.add(parentDetailed);
+        List<DiscretePoint> parentPoints;
+        if (type == ActivationType.FIRST) {
+            parentPoints = getParents1(point.x, point.y, point.k);
+        } else {
+            parentPoints = getParents2(point.x, point.y, point.k);
         }
-        DiscretePointDetailed newPoint = new DiscretePointDetailed(point, parents);
-        activePoints.put(newPoint.point, newPoint);
-        return newPoint;
-    }
-
-    private DiscretePointDetailed activate2(DiscretePoint point) {
-        point.normalize();
-        List<DiscretePoint> parentPoints = getParents2(point.x, point.y, point.k);
         List<DiscretePointDetailed> parents = new ArrayList<DiscretePointDetailed>();
+        checkRefinePossibility();
         for (DiscretePoint parentPoint : parentPoints) {
-            System.out.println("parent : " + parentPoint);
             parentPoint.normalize();
-            DiscretePointDetailed parentDetailed = activePoints.containsKey(parentPoint)
-                    ? activePoints.get(parentPoint)
-                    : activate1(parentPoint);
+            DiscretePointDetailed parentDetailed =
+                    activePoints.containsKey(parentPoint)
+                        ? activePoints.get(parentPoint)
+                        : (type == ActivationType.FIRST
+                            ? activate(parentPoint, ActivationType.SECOND)
+                            : activate(parentPoint, ActivationType.FIRST)
+                    );
             parents.add(parentDetailed);
         }
         DiscretePointDetailed newPoint = new DiscretePointDetailed(point, parents);
@@ -116,8 +120,8 @@ public class BinaryTriangulation {
     }
 
     private List<DiscretePoint> getParents1(int x, int y, int k) {
-        List<Integer> xList = getParentCoordinateList1(x, k);
-        List<Integer> yList = getParentCoordinateList1(y, k);
+        List<Integer> xList = getParentCoordinateList(x, k, ActivationType.FIRST);
+        List<Integer> yList = getParentCoordinateList(y, k, ActivationType.FIRST);
         List<DiscretePoint> parents = new ArrayList<DiscretePoint>();
         for (int px : xList) {
             for (int py : yList) {
@@ -128,8 +132,8 @@ public class BinaryTriangulation {
     }
 
     private List<DiscretePoint> getParents2(int x, int y, int k) {
-        List<Integer> xList = getParentCoordinateList2(x, k);
-        List<Integer> yList = getParentCoordinateList2(y, k);
+        List<Integer> xList = getParentCoordinateList(x, k, ActivationType.SECOND);
+        List<Integer> yList = getParentCoordinateList(y, k, ActivationType.SECOND);
         List<DiscretePoint> parents = new ArrayList<DiscretePoint>();
         for (int px : xList) {
             parents.add(new DiscretePoint(px, y, k));
@@ -141,38 +145,33 @@ public class BinaryTriangulation {
         return parents;
     }
 
-    private List<Integer> getParentCoordinateList1(int c, int k) {
-        List<Integer> yList = new ArrayList<Integer>();
+    private List<Integer> getParentCoordinateList(int c, int k, ActivationType type) {
+        List<Integer> cList = new ArrayList<Integer>();
 
-        int parentY = (c - 1) / 2;
-        if (inBounds(parentY, k - 1)) {
-            yList.add(parentY);
+        int parentC = (c - 1);
+        if(type == ActivationType.FIRST) {
+            parentC /= 2;
+        }
+        if (inBounds(parentC, k)) {
+            cList.add(parentC);
         }
 
-        parentY = (c + 1) / 2;
-        if (inBounds(parentY, k - 1)) {
-            yList.add(parentY);
+        parentC = (c + 1);
+        if(type == ActivationType.FIRST) {
+            parentC /= 2;
         }
-        return yList;
-    }
-
-    private List<Integer> getParentCoordinateList2(int c, int k) {
-        List<Integer> yList = new ArrayList<Integer>();
-
-        int parentY = (c - 1);
-        if (inBounds(parentY, k)) {
-            yList.add(parentY);
+        if (inBounds(parentC, k)) {
+            cList.add(parentC);
         }
-
-        parentY = (c + 1);
-        if (inBounds(parentY, k)) {
-            yList.add(parentY);
-        }
-        return yList;
+        return cList;
     }
 
     private boolean inBounds(int c, int k) {
         return c >= 0 && c <= 1 << k;
+    }
+
+    private void checkRefinePossibility() {
+
     }
 
     @AllArgsConstructor
@@ -188,8 +187,15 @@ public class BinaryTriangulation {
 
         public Coord3d getCoordinates() {
             double factor = 1 << point.k; //2^k
-            return new Coord3d(point.x * (right - left) / factor, point.y * (top - bottom) / factor, 1);
+            return new Coord3d(point.x * (right - left) / factor, point.y * (top - bottom) / factor, point.k + 1);
         }
+    }
+
+    public enum ActivationType {
+        //activating parents that lays diagonally (used when point is in the center of grid cell)
+        FIRST,
+        //activating parents that lays vertically/horizontally (used when point is on the bound of grid cell)
+        SECOND
     }
 }
 
