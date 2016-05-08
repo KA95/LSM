@@ -1,10 +1,10 @@
-package calculation.advanced;
+package old.calculation.advanced;
 
-import calculation.basic.LinearFunction;
-import calculation.basic.Point2D;
-import calculation.basic.Triangle;
-import calculation.basic.Triangle2D;
-import calculation.util.CalculationUtil;
+import old.calculation.basic.LinearFunction;
+import binary_triangulations.calculation.model.Point2D;
+import old.calculation.basic.Triangle;
+import old.calculation.basic.Triangle2D;
+import binary_triangulations.calculation.util.CalculationUtil;
 
 import java.util.ArrayList;
 import java.util.List;

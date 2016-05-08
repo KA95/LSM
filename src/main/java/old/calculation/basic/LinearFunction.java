@@ -1,10 +1,8 @@
-package calculation.basic;
+package old.calculation.basic;
 
-import calculation.util.CalculationUtil;
+import binary_triangulations.calculation.model.Point3D;
+import binary_triangulations.calculation.util.CalculationUtil;
 
-/**
- * Created by Anton KLimansky on 10.12.2015.
- */
 public class LinearFunction {
     double A, B, C, D;
 
@@ -15,12 +13,12 @@ public class LinearFunction {
         D = d;
     }
 
-    public LinearFunction(Point p1, Point p2, Point p3) {
+    public LinearFunction(Point3D p1, Point3D p2, Point3D p3) {
         fillInfo(p1, p2, p3);
     }
 
-    private void fillInfo(Point p1, Point p2, Point p3) {
-        Point v, w;
+    private void fillInfo(Point3D p1, Point3D p2, Point3D p3) {
+        Point3D v, w;
         v = p2.minus(p1);
         w = p3.minus(p1);
         double[][] d1 = {{v.getX(), v.getY()}, {w.getX(), w.getY()}};

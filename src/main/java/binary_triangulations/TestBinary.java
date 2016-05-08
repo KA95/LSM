@@ -1,6 +1,8 @@
 package binary_triangulations;
 
-import calculation.basic.Point2D;
+import binary_triangulations.calculation.BinaryTriangulation;
+import binary_triangulations.drawing.BTAnalysis;
+import binary_triangulations.calculation.model.Point2D;
 import org.jzy3d.analysis.AnalysisLauncher;
 
 import java.util.ArrayList;
@@ -26,8 +28,43 @@ public class TestBinary {
         BinaryTriangulation triangulation = new BinaryTriangulation(LEFT, BOTTOM, RIGHT, TOP);
         btAnalysis.setTriangulation(triangulation);
         AnalysisLauncher.open(btAnalysis);
-        Thread.sleep(2000);
-        triangulation.activate(new DiscretePoint(9,5,4), BinaryTriangulation.ActivationType.FIRST);
+
+        testTriangulation(btAnalysis, triangulation);
+
+    }
+
+    private static void testTriangulation(BTAnalysis btAnalysis, BinaryTriangulation triangulation) throws InterruptedException {
+//        Thread.sleep(2000);
+        triangulation.refine(0.2,0.2);
+        triangulation.refine(0.9,0.9);
+        triangulation.refine(0.7,0.7);
+//        btAnalysis.updateTriangulation(triangulation);
+
+        triangulation.degreeUp(); //////////////////////////////////////////
+
+//        Thread.sleep(2000);
+        triangulation.refine(0.2,0.2);
+        triangulation.refine(0.7,0.7);
+//        btAnalysis.updateTriangulation(triangulation);
+
+
+        triangulation.degreeUp(); //////////////////////////////////////////
+
+//        Thread.sleep(2000);
+        triangulation.refine(0.2,0.2);
+        triangulation.refine(0.7,0.7);
+//        btAnalysis.updateTriangulation(triangulation);
+
+        triangulation.degreeUp(); //////////////////////////////////////////
+
+//        Thread.sleep(2000);
+        triangulation.refine(0.7,0.7);
+//        btAnalysis.updateTriangulation(triangulation);
+
+        triangulation.degreeUp(); //////////////////////////////////////////
+
+//        Thread.sleep(2000);
+        triangulation.refine(0.7,0.7);
         btAnalysis.updateTriangulation(triangulation);
     }
 
@@ -37,6 +74,7 @@ public class TestBinary {
             System.out.println("i = " + i);
             Thread.sleep(2000);
             btAnalysis.updatePoints(points);
+            //triangulation for them
         }
     }
 

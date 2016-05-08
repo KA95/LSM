@@ -1,13 +1,11 @@
-package calculation.basic;
+package old.calculation.basic;
 
-import calculation.util.CalculationUtil;
+import binary_triangulations.calculation.model.Point2D;
+import binary_triangulations.calculation.util.CalculationUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Lenovo on 10.12.2015.
- */
 public class Triangle2D {
     private Point2D p1,p2,p3;
 

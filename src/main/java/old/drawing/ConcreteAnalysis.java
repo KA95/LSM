@@ -1,10 +1,10 @@
-package drawing;
+package old.drawing;
 
-import calculation.advanced.Triangulation;
-import calculation.basic.Point;
-import calculation.basic.Point2D;
-import calculation.basic.Triangle;
-import drawing.util.DrawingUtil;
+import old.calculation.advanced.Triangulation;
+import binary_triangulations.calculation.model.Point3D;
+import binary_triangulations.calculation.model.Point2D;
+import old.calculation.basic.Triangle;
+import old.drawing.util.DrawingUtil;
 import lombok.Setter;
 import org.jzy3d.analysis.AbstractAnalysis;
 import org.jzy3d.chart.factories.AWTChartComponentFactory;
@@ -33,10 +33,10 @@ public class ConcreteAnalysis extends AbstractAnalysis {
     }
 
     private void drawPointSet() {
-        List<Point> points = DrawingUtil.createInputDataPoints(dataPoints);
-        Coord3d[] newPoints = new Coord3d[points.size()];
-        for (int i = 0; i < points.size(); i++) {
-            newPoints[i] = DrawingUtil.coordFromPoint(points.get(i));
+        List<Point3D> point3Ds = DrawingUtil.createInputDataPoints(dataPoints);
+        Coord3d[] newPoints = new Coord3d[point3Ds.size()];
+        for (int i = 0; i < point3Ds.size(); i++) {
+            newPoints[i] = DrawingUtil.coordFromPoint(point3Ds.get(i));
         }
         Scatter scatter = new Scatter(newPoints, Color.BLACK, 1f);
         draw(scatter);

@@ -1,10 +1,7 @@
-package calculation.basic;
+package binary_triangulations.calculation.model;
 
-import calculation.util.CalculationUtil;
+import binary_triangulations.calculation.util.CalculationUtil;
 
-/**
- * Created by Lenovo on 10.12.2015.
- */
 public class Point2D implements Comparable<Point2D> {
     double x,y;
 
@@ -29,7 +26,7 @@ public class Point2D implements Comparable<Point2D> {
         this.y = y;
     }
 
-    public Point2D(Point p) {
+    public Point2D(Point3D p) {
         this.x = p.getX();
         this.y = p.getY();
     }

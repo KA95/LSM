@@ -1,11 +1,12 @@
-package drawing.util;
+package old.drawing.util;
 
-import calculation.advanced.PyramidalFunction;
-import calculation.advanced.Triangulation;
-import calculation.basic.LinearFunction;
-import calculation.basic.Point2D;
-import calculation.basic.Triangle;
-import calculation.basic.Triangle2D;
+import binary_triangulations.calculation.model.Point3D;
+import old.calculation.advanced.PyramidalFunction;
+import old.calculation.advanced.Triangulation;
+import old.calculation.basic.LinearFunction;
+import binary_triangulations.calculation.model.Point2D;
+import old.calculation.basic.Triangle;
+import old.calculation.basic.Triangle2D;
 import org.jzy3d.colors.Color;
 import org.jzy3d.maths.Coord3d;
 import org.jzy3d.plot3d.primitives.Point;
@@ -32,24 +33,24 @@ public class DrawingUtil {
         return result;
     }
 
-    public static List<Polygon> createPyramidalFunctions(Collection<PyramidalFunction> functionSet, List<calculation.basic.Point> points) {
+    public static List<Polygon> createPyramidalFunctions(Collection<PyramidalFunction> functionSet, List<Point3D> point3Ds) {
         ArrayList<Polygon> result = new ArrayList<Polygon>();
         for (PyramidalFunction function : functionSet) {
             for (Triangle t : function.getParts()) {
                 Point2D p = new Point2D((t.getP1().getX() + t.getP2().getX() + t.getP3().getX()) / 3,
                         (t.getP1().getY() + t.getP2().getY() + t.getP3().getY()) / 3);
                 LinearFunction lf = new LinearFunction(t);
-                points.add(new calculation.basic.Point(p.getX(), p.getY(), lf.calculateZ(p.getX(), p.getY())));
+                point3Ds.add(new Point3D(p.getX(), p.getY(), lf.calculateZ(p.getX(), p.getY())));
                 result.add(createTriangle(t));
             }
         }
         return result;
     }
 
-    public static List<calculation.basic.Point> createInputDataPoints(Map<Point2D, Double> points) {
-        ArrayList<calculation.basic.Point> result = new ArrayList<calculation.basic.Point>();
+    public static List<Point3D> createInputDataPoints(Map<Point2D, Double> points) {
+        ArrayList<Point3D> result = new ArrayList<Point3D>();
         for (Map.Entry<Point2D, Double> entry : points.entrySet()) {
-            result.add(new calculation.basic.Point(entry.getKey().getX(), entry.getKey().getY(), entry.getValue()));
+            result.add(new Point3D(entry.getKey().getX(), entry.getKey().getY(), entry.getValue()));
         }
         return result;
     }
@@ -75,7 +76,7 @@ public class DrawingUtil {
         return polygon;
     }
 
-    public static Coord3d coordFromPoint(calculation.basic.Point p) {
+    public static Coord3d coordFromPoint(Point3D p) {
         return new Coord3d(p.getX(), p.getY(), p.getZ());
     }
 }

@@ -1,9 +1,11 @@
-import calculation.advanced.Triangulation;
-import calculation.basic.Point;
-import calculation.basic.Point2D;
-import calculation.basic.Triangle;
-import calculation.basic.Triangle2D;
-import drawing.ConcreteAnalysis;
+package old;
+
+import binary_triangulations.calculation.model.Point3D;
+import old.calculation.advanced.Triangulation;
+import binary_triangulations.calculation.model.Point2D;
+import old.calculation.basic.Triangle;
+import old.calculation.basic.Triangle2D;
+import old.drawing.ConcreteAnalysis;
 import org.jzy3d.analysis.AnalysisLauncher;
 
 import java.util.ArrayList;
@@ -76,10 +78,10 @@ public class Main {
     private static List<Triangle> buildApproximation(Map<Point2D, Double> inputData, Triangulation triangulation) {
         List<Triangle> result = new ArrayList<Triangle>();
         for (Triangle2D t : triangulation.getTriangles()) {
-            Point p1, p2, p3;
-            p1 = new Point(t.getP1());
-            p2 = new Point(t.getP2());
-            p3 = new Point(t.getP3());
+            Point3D p1, p2, p3;
+            p1 = new Point3D(t.getP1());
+            p2 = new Point3D(t.getP2());
+            p3 = new Point3D(t.getP3());
             p1.setZ(inputData.get(t.getP1()));
             p2.setZ(inputData.get(t.getP2()));
             p3.setZ(inputData.get(t.getP2()));

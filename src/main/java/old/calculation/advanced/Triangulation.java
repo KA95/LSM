@@ -1,8 +1,8 @@
-package calculation.advanced;
+package old.calculation.advanced;
 
-import calculation.basic.Point2D;
-import calculation.basic.Triangle;
-import calculation.basic.Triangle2D;
+import binary_triangulations.calculation.model.Point2D;
+import old.calculation.basic.Triangle;
+import old.calculation.basic.Triangle2D;
 
 import java.util.*;
 

@@ -1,6 +1,7 @@
-package binary_triangulations;
+package binary_triangulations.drawing;
 
-import calculation.basic.Point2D;
+import binary_triangulations.calculation.BinaryTriangulation;
+import binary_triangulations.calculation.model.Point2D;
 import lombok.Setter;
 import org.jzy3d.analysis.AbstractAnalysis;
 import org.jzy3d.chart.factories.AWTChartComponentFactory;
