@@ -23,14 +23,13 @@ public class BTAnalysis extends AbstractAnalysis {
     public void init() {
         chart = AWTChartComponentFactory.chart(Quality.Advanced, getCanvasType());
         drawPointSet();
-        draw(triangulation.getShape());
+        draw(triangulation.buildShape());
     }
 
     public void updateTriangulation(BinaryTriangulation triangulation) {
-        chart.removeDrawable(triangulation.getShape());
+        chart.removeDrawable(triangulation.buildShape());
         this.triangulation = triangulation;
-        triangulation.rebuildShape();
-        draw(triangulation.getShape());
+        draw(triangulation.buildShape());
         chart.updateProjectionsAndRender();
     }
 

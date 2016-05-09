@@ -1,12 +1,14 @@
 package binary_triangulations;
 
 import binary_triangulations.calculation.BinaryTriangulation;
+import binary_triangulations.calculation.model.DiscretePoint;
 import binary_triangulations.drawing.BTAnalysis;
 import binary_triangulations.calculation.model.Point2D;
 import org.jzy3d.analysis.AnalysisLauncher;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TestBinary {
 
@@ -19,7 +21,7 @@ public class TestBinary {
 
 
     public static void main(String[] args) throws Exception {
-        List<Point2D> points = new ArrayList<Point2D>();
+        List<Point2D> points = new ArrayList<>();
         points.add(new Point2D(0, 0));
         points.add(new Point2D(1, 1));
         BTAnalysis btAnalysis = new BTAnalysis();
@@ -34,38 +36,23 @@ public class TestBinary {
     }
 
     private static void testTriangulation(BTAnalysis btAnalysis, BinaryTriangulation triangulation) throws InterruptedException {
-//        Thread.sleep(2000);
         triangulation.refine(0.2,0.2);
         triangulation.refine(0.9,0.9);
         triangulation.refine(0.7,0.7);
-//        btAnalysis.updateTriangulation(triangulation);
 
-        triangulation.degreeUp(); //////////////////////////////////////////
+        triangulation.degreeUp();
 
-//        Thread.sleep(2000);
-        triangulation.refine(0.2,0.2);
-        triangulation.refine(0.7,0.7);
-//        btAnalysis.updateTriangulation(triangulation);
-
-
-        triangulation.degreeUp(); //////////////////////////////////////////
-
-//        Thread.sleep(2000);
-        triangulation.refine(0.2,0.2);
-        triangulation.refine(0.7,0.7);
-//        btAnalysis.updateTriangulation(triangulation);
-
-        triangulation.degreeUp(); //////////////////////////////////////////
-
-//        Thread.sleep(2000);
-        triangulation.refine(0.7,0.7);
-//        btAnalysis.updateTriangulation(triangulation);
-
-        triangulation.degreeUp(); //////////////////////////////////////////
-
-//        Thread.sleep(2000);
         triangulation.refine(0.7,0.7);
         btAnalysis.updateTriangulation(triangulation);
+
+        for(Map.Entry<DiscretePoint, List<DiscretePoint>> entry: triangulation.buildNeighboursSortedCounterClockwise().entrySet()){
+            System.out.println(entry.getKey() + " : {");
+            for(DiscretePoint neighbour : entry.getValue()) {
+                System.out.println("\t" + neighbour + ",");
+            }
+            System.out.println("}");
+        }
+
     }
 
     private static void testDynamicAddingPoints(List<Point2D> points, BTAnalysis btAnalysis) throws Exception {
