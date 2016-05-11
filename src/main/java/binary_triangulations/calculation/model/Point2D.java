@@ -3,23 +3,7 @@ package binary_triangulations.calculation.model;
 import binary_triangulations.calculation.util.CalculationUtil;
 
 public class Point2D implements Comparable<Point2D> {
-    double x,y;
-
-    public double getX() {
-        return x;
-    }
-
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
+    public double x,y;
 
     public Point2D(double x, double y) {
         this.x = x;
@@ -27,24 +11,24 @@ public class Point2D implements Comparable<Point2D> {
     }
 
     public Point2D(Point3D p) {
-        this.x = p.getX();
-        this.y = p.getY();
+        this.x = p.x;
+        this.y = p.y;
     }
 
     public int compareTo(Point2D o) {
-        if(!CalculationUtil.equals(x, o.getX()))
-            return Double.compare(x,o.getX());
-        if(!CalculationUtil.equals(y,o.getY()))
-            return Double.compare(y,o.getY());
-        return Double.compare(x,o.getX());
+        if(!CalculationUtil.equals(x, o.x))
+            return Double.compare(x,o.x);
+        if(!CalculationUtil.equals(y,o.y))
+            return Double.compare(y,o.y);
+        return Double.compare(x,o.x);
     }
 
     @Override
     public boolean equals(Object o) {
         if(o instanceof Point2D) {
             Point2D p = (Point2D) o;
-            return CalculationUtil.equals(p.getX(), x) &&
-                    CalculationUtil.equals(p.getY(), y);
+            return CalculationUtil.equals(p.x, x) &&
+                    CalculationUtil.equals(p.y, y);
         }
         return false;
     }

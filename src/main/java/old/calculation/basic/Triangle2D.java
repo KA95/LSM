@@ -48,8 +48,8 @@ public class Triangle2D {
     }
 
     public List<Triangle2D> split() {
-        List<Triangle2D> result = new ArrayList<Triangle2D>();
-        Point2D pm = new Point2D((p1.getX() + p2.getX())/2, (p1.getY() + p2.getY())/2);
+        List<Triangle2D> result = new ArrayList<>();
+        Point2D pm = new Point2D((p1.x + p2.x)/2, (p1.y + p2.y)/2);
         result.add(new Triangle2D(p1,p3,pm));
         result.add(new Triangle2D(p2,p3,pm));
         return result;
@@ -84,7 +84,7 @@ public class Triangle2D {
     }
 
     public List<Point2D> getVerticesList() {
-        List<Point2D> result = new ArrayList<Point2D>();
+        List<Point2D> result = new ArrayList<>();
         result.add(p1);
         result.add(p2);
         result.add(p3);

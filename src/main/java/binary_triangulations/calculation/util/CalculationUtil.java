@@ -12,10 +12,10 @@ public class CalculationUtil {
 
     public static double dist2D(Point2D p1, Point2D p2) {
         double x1, x2, y1, y2;
-        x1 = p1.getX();
-        x2 = p2.getX();
-        y1 = p1.getY();
-        y2 = p2.getY();
+        x1 = p1.x;
+        x2 = p2.x;
+        y1 = p1.y;
+        y2 = p2.y;
         return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     }
 

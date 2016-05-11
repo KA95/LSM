@@ -21,13 +21,13 @@ public class LinearFunction {
         Point3D v, w;
         v = p2.minus(p1);
         w = p3.minus(p1);
-        double[][] d1 = {{v.getX(), v.getY()}, {w.getX(), w.getY()}};
-        double[][] d2 = {{v.getX(), v.getZ()}, {w.getX(), w.getZ()}};
-        double[][] d3 = {{v.getY(), v.getZ()}, {w.getY(), w.getZ()}};
+        double[][] d1 = {{v.x, v.y}, {w.x, w.y}};
+        double[][] d2 = {{v.x, v.z}, {w.x, w.z}};
+        double[][] d3 = {{v.y, v.z}, {w.y, w.z}};
         A = CalculationUtil.determinant2x2(d3);
         B = -CalculationUtil.determinant2x2(d2);
         C = CalculationUtil.determinant2x2(d1);
-        D = -(A * p1.getX() + B * p1.getY() + C * p1.getZ());
+        D = -(A * p1.x + B * p1.y + C * p1.z);
     }
 
     public LinearFunction(Triangle t) {

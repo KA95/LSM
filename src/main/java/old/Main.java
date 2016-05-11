@@ -63,7 +63,7 @@ public class Main {
     private static Map<Point2D, Double> initDataPoints() {
         int count = (int) Math.pow(2, DATA_DEGREE);
         double step = (TOP - BOTTOM) / Math.pow(2, DATA_DEGREE);
-        Map<Point2D, Double> result = new TreeMap<Point2D, Double>();
+        Map<Point2D, Double> result = new TreeMap<>();
         for (int i = 0; i <= count; i++) {
             for (int j = 0; j <= count; j++) {
                 double x, y;
@@ -76,15 +76,15 @@ public class Main {
     }
 
     private static List<Triangle> buildApproximation(Map<Point2D, Double> inputData, Triangulation triangulation) {
-        List<Triangle> result = new ArrayList<Triangle>();
+        List<Triangle> result = new ArrayList<>();
         for (Triangle2D t : triangulation.getTriangles()) {
             Point3D p1, p2, p3;
             p1 = new Point3D(t.getP1());
             p2 = new Point3D(t.getP2());
             p3 = new Point3D(t.getP3());
-            p1.setZ(inputData.get(t.getP1()));
-            p2.setZ(inputData.get(t.getP2()));
-            p3.setZ(inputData.get(t.getP2()));
+            p1.z = (inputData.get(t.getP1()));
+            p2.z = (inputData.get(t.getP2()));
+            p3.z = (inputData.get(t.getP2()));
             Triangle newT = new Triangle(p1, p2, p3);
             result.add(newT);
         }

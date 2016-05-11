@@ -20,7 +20,7 @@ public class Triangulation {
     }
 
     public Triangulation() {
-        triangles = new HashSet<Triangle2D>();
+        triangles = new HashSet<>();
     }
 
     public void addTriangle(Triangle2D triangle) {
@@ -28,8 +28,8 @@ public class Triangulation {
     }
 
     public void rebuildVertices() {
-        vertices = new TreeMap<Point2D, PyramidalFunction>();
-        for(Triangle2D t : triangles) {
+        vertices = new TreeMap<>();
+        for (Triangle2D t : triangles) {
             updatePyramidalFunctionP1(t);
             updatePyramidalFunctionP2(t);
             updatePyramidalFunctionP3(t);
@@ -39,9 +39,9 @@ public class Triangulation {
     private void updatePyramidalFunctionP1(Triangle2D t) {
         Point2D p1 = t.getP1();
         Triangle t1 = new Triangle(t);
-        t1.getP1().setZ(1);
+        t1.getP1().z = 1;
         if (!vertices.containsKey(p1)) {
-            vertices.put(p1, new PyramidalFunction(p1,t1));
+            vertices.put(p1, new PyramidalFunction(p1, t1));
         } else {
             vertices.get(p1).addPart(t1);
         }
@@ -50,9 +50,9 @@ public class Triangulation {
     private void updatePyramidalFunctionP2(Triangle2D t) {
         Point2D p2 = t.getP2();
         Triangle t1 = new Triangle(t);
-        t1.getP2().setZ(1);
+        t1.getP2().z = 1;
         if (!vertices.containsKey(p2)) {
-            vertices.put(p2, new PyramidalFunction(p2,t1));
+            vertices.put(p2, new PyramidalFunction(p2, t1));
         } else {
             vertices.get(p2).addPart(t1);
         }
@@ -61,9 +61,9 @@ public class Triangulation {
     private void updatePyramidalFunctionP3(Triangle2D t) {
         Point2D p3 = t.getP3();
         Triangle t1 = new Triangle(t);
-        t1.getP3().setZ(1);
+        t1.getP3().z = 1;
         if (!vertices.containsKey(p3)) {
-            vertices.put(p3, new PyramidalFunction(p3,t1));
+            vertices.put(p3, new PyramidalFunction(p3, t1));
         } else {
             vertices.get(p3).addPart(t1);
         }
@@ -72,11 +72,9 @@ public class Triangulation {
     public void fullSplitting() {
         Set<Triangle2D> oldTriangles = triangles;
         triangles = null;
-        triangles = new HashSet<Triangle2D>();
-        for(Triangle2D tr : oldTriangles) {
-            for(Triangle2D t : tr.split()) {
-                addTriangle(t);
-            }
+        triangles = new HashSet<>();
+        for (Triangle2D tr : oldTriangles) {
+            tr.split().forEach(this::addTriangle);
         }
         rebuildVertices();
     }
