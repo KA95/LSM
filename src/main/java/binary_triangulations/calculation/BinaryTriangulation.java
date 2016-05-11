@@ -33,7 +33,7 @@ public class BinaryTriangulation {
     /**
      * Rebuild drawable shape.
      */
-    public Shape buildShape() {
+    public Shape buildTriangulationShape() {
         List<Polygon> lines = new ArrayList<>();
         int v = 0;
         int e = 0;
@@ -42,13 +42,65 @@ public class BinaryTriangulation {
             if (point.parents != null) {
                 for (DiscretePointDetailed parent : point.parents) {
                     e++;
-                    lines.add(DrawingUtil.createLine(point.getCoordinates(), parent.getCoordinates()));
+                    lines.add(DrawingUtil.createLine(getCoordinates(point.getPoint()), getCoordinates(parent.getPoint())));
                 }
             }
         }
         System.out.println("e = " + e);
         System.out.println("v = " + v);
         return new Shape(lines);
+    }
+
+    public Shape buildPyramidalFunctionsShape() {
+        Map<DiscretePoint, List<DiscretePoint>> neighboursMap = buildNeighboursSortedCounterClockwise();
+        List<Polygon> triangles = new ArrayList<>();
+        for (DiscretePoint point : activePoints.keySet()) {
+            System.out.println();
+            System.out.println("Pyramidal function for " + point);
+            List<DiscretePoint> neighbourhood = neighboursMap.get(point);
+
+            System.out.println(point + " : {");
+            for (DiscretePoint neighbour : neighbourhood) {
+                System.out.println("\t" + neighbour + ",");
+            }
+            System.out.println("}");
+
+            DiscretePoint p1 = neighbourhood.get(neighbourhood.size() - 1);
+            DiscretePoint p2;
+            for (DiscretePoint neighbour : neighbourhood) {
+                p2 = neighbour;
+                if (!angleGEthan180(p1, point, p2)) {
+                    triangles.add(DrawingUtil.createTriangle(
+                            getCoordinates(p1, 1),
+                            getCoordinates(p2, 1),
+                            getCoordinates(point, 3)
+                    ));
+                }
+                p1 = p2;
+            }
+
+            System.out.println(triangles.size() + " triangles");
+        }
+        return new Shape(triangles);
+    }
+
+    private boolean angleGEthan180(DiscretePoint p1, DiscretePoint point, DiscretePoint p2) {
+        int maxK = Math.max(p1.k, Math.max(p2.k, point.k));
+        p1 = p1.getNotNormalForm(maxK);
+        p2 = p2.getNotNormalForm(maxK);
+        point = point.getNotNormalForm(maxK);
+        int ax, ay, bx, by;
+        ax = p1.x - point.x;
+        ay = p1.y - point.y;
+        bx = p2.x - point.x;
+        by = p2.y - point.y;
+
+        return ax * by - ay * bx <= 0;
+
+    }
+
+    public Set<DiscretePoint> getActivePoints() {
+        return activePoints.keySet();
     }
 
     public BinaryTriangulation(double left, double bottom, double right, double top) {
@@ -305,6 +357,16 @@ public class BinaryTriangulation {
         return new DiscretePoint(p1.x + p2.x, p1.y + p2.y, maxK + 1);
     }
 
+    private Coord3d getCoordinates(DiscretePoint p) {
+        double factor = 1 << p.k; //2^k
+        return new Coord3d(p.x * (right - left) / factor, p.y * (top - bottom) / factor, 1);
+    }
+
+    private Coord3d getCoordinates(DiscretePoint p, double z) {
+        double factor = 1 << p.k; //2^k
+        return new Coord3d(p.x * (right - left) / factor, p.y * (top - bottom) / factor, z);
+    }
+
     private enum ActivationType {
         //activating parents that lays diagonally (used when point is in the center of grid cell)
         FIRST,
@@ -325,12 +387,6 @@ public class BinaryTriangulation {
             this.point = new DiscretePoint(x, y, k);
             this.parents = parents;
         }
-
-        public Coord3d getCoordinates() {
-            double factor = 1 << point.k; //2^k
-            return new Coord3d(point.x * (right - left) / factor, point.y * (top - bottom) / factor, 1);
-        }
-
     }
 }
 

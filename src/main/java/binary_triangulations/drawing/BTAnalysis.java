@@ -1,6 +1,7 @@
 package binary_triangulations.drawing;
 
 import binary_triangulations.calculation.BinaryTriangulation;
+import binary_triangulations.calculation.model.DiscretePoint;
 import binary_triangulations.calculation.model.Point2D;
 import lombok.Setter;
 import org.jzy3d.analysis.AbstractAnalysis;
@@ -23,13 +24,18 @@ public class BTAnalysis extends AbstractAnalysis {
     public void init() {
         chart = AWTChartComponentFactory.chart(Quality.Advanced, getCanvasType());
         drawPointSet();
-        draw(triangulation.buildShape());
+        draw(triangulation.buildTriangulationShape());
     }
 
     public void updateTriangulation(BinaryTriangulation triangulation) {
-        chart.removeDrawable(triangulation.buildShape());
+//        chart.removeDrawable(triangulation.buildTriangulationShape());
         this.triangulation = triangulation;
-        draw(triangulation.buildShape());
+        draw(triangulation.buildTriangulationShape());
+        chart.updateProjectionsAndRender();
+    }
+
+    public void drawPyramidalFunctions() {
+        draw(triangulation.buildPyramidalFunctionsShape());
         chart.updateProjectionsAndRender();
     }
 

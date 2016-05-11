@@ -9,6 +9,7 @@ import org.jzy3d.analysis.AnalysisLauncher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class TestBinary {
 
@@ -36,22 +37,41 @@ public class TestBinary {
     }
 
     private static void testTriangulation(BTAnalysis btAnalysis, BinaryTriangulation triangulation) throws InterruptedException {
-        triangulation.refine(0.2,0.2);
-        triangulation.refine(0.9,0.9);
-        triangulation.refine(0.7,0.7);
 
+        triangulation.refine(0.7,0.7);
+        triangulation.refine(0.2,0.2);
+        triangulation.refine(0.2,0.7);
         triangulation.degreeUp();
 
         triangulation.refine(0.7,0.7);
+        triangulation.refine(0.2,0.2);
+        triangulation.refine(0.2,0.7);
+        triangulation.degreeUp();
+
+        triangulation.refine(0.7,0.7);
+        triangulation.refine(0.2,0.2);
+        triangulation.refine(0.2,0.7);
+        triangulation.degreeUp();
+
+        triangulation.refine(0.7,0.7);
+        triangulation.refine(0.2,0.2);
+        triangulation.refine(0.2,0.7);
+        triangulation.degreeUp();
+
+        triangulation.refine(0.7,0.7);
+        triangulation.refine(0.2,0.2);
+        triangulation.refine(0.2,0.7);
+        triangulation.degreeUp();
+
+        triangulation.refine(0.7,0.7);
+        triangulation.refine(0.2,0.2);
+        triangulation.refine(0.2,0.7);
+        triangulation.degreeUp();
+
         btAnalysis.updateTriangulation(triangulation);
 
-        for(Map.Entry<DiscretePoint, List<DiscretePoint>> entry: triangulation.buildNeighboursSortedCounterClockwise().entrySet()){
-            System.out.println(entry.getKey() + " : {");
-            for(DiscretePoint neighbour : entry.getValue()) {
-                System.out.println("\t" + neighbour + ",");
-            }
-            System.out.println("}");
-        }
+        Thread.sleep(2000);
+        btAnalysis.drawPyramidalFunctions();
 
     }
 
