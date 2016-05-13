@@ -1,6 +1,4 @@
-package old.calculation.basic;
-
-import binary_triangulations.calculation.model.Point3D;
+package binary_triangulations.calculation.model.basic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +34,7 @@ public class Triangle {
     }
 
     public List<Point3D> getVerticesList() {
-        List<Point3D> result = new ArrayList<Point3D>();
+        List<Point3D> result = new ArrayList<>();
         result.add(p1);
         result.add(p2);
         result.add(p3);

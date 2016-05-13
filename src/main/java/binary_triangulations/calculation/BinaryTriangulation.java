@@ -1,11 +1,11 @@
 package binary_triangulations.calculation;
 
-import binary_triangulations.calculation.model.ActivationType;
-import binary_triangulations.calculation.model.DiscreteNet;
-import binary_triangulations.calculation.model.DiscretePoint;
-import binary_triangulations.calculation.model.DiscretePointDetailed;
-import old.calculation.advanced.PyramidalFunction;
-import old.drawing.util.DrawingUtil;
+import binary_triangulations.calculation.model.*;
+import binary_triangulations.calculation.model.basic.DiscretePoint;
+import binary_triangulations.calculation.model.basic.Point2D;
+import binary_triangulations.calculation.model.basic.Point3D;
+import binary_triangulations.calculation.model.basic.Triangle;
+import binary_triangulations.drawing.DrawingUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,6 +32,8 @@ public class BinaryTriangulation {
 
     private Map<DiscretePoint, PyramidalFunction> pyramidalFunctionMap;
 
+    private Map<DiscretePoint, List<DiscretePoint>> neighboursMap;
+
     public BinaryTriangulation(double left, double bottom, double right, double top) {
         this.left = left;
         this.right = right;
@@ -46,42 +48,61 @@ public class BinaryTriangulation {
      */
     public Shape buildTriangulationShape() {
         List<Polygon> lines = new ArrayList<>();
-        int v = 0;
-        int e = 0;
-        for (DiscretePointDetailed point : net.getActivePointsMap().values()) {
-            v++;
-            if (point.getParents() != null) {
-                for (DiscretePointDetailed parent : point.getParents()) {
-                    e++;
-                    lines.add(DrawingUtil.createLine(getCoordinates(point.getPoint()), getCoordinates(parent.getPoint())));
-                }
-            }
-        }
-        System.out.println("e = " + e);
-        System.out.println("v = " + v);
+        net.getActivePointsMap().values().stream().filter(point -> point.getParents() != null).forEach(
+                point -> lines.addAll(
+                        point.getParents().stream()
+                                .map(parent -> DrawingUtil.createLine(getCoordinates(point.getPoint()), getCoordinates(parent.getPoint())))
+                                .collect(Collectors.toList())
+                )
+        );
+        return new Shape(lines);
+    }
+
+    public Shape buildApproximationShape(Map<DiscretePoint, Double> coefficients) {
+        List<Polygon> lines = new ArrayList<>();
+        net.getActivePointsMap().values().stream().filter(point -> point.getParents() != null).forEach(
+                point -> lines.addAll(point.getParents().stream().map(
+                        parent -> DrawingUtil.createLine(
+                                getCoordinates(point.getPoint(), coefficients.get(point.getPoint())),
+                                getCoordinates(parent.getPoint(), coefficients.get(parent.getPoint()))
+                        )).collect(Collectors.toList())));
         return new Shape(lines);
     }
 
     public Shape buildPyramidalFunctionsShape() {
-        Map<DiscretePoint, List<DiscretePoint>> neighboursMap = net.buildNeighboursSortedCounterClockwise();
-        List<Polygon> triangles = new ArrayList<>();
+
+        List<Polygon> polygons = new ArrayList<>();
+
+        updatePyramidalFunctionsAndNeighbours();
+        for (PyramidalFunction pf : pyramidalFunctionMap.values()) {
+            polygons.addAll(pf.getParts().stream().map(DrawingUtil::createTriangle).collect(Collectors.toList()));
+        }
+        return new Shape(polygons);
+    }
+
+    public void updatePyramidalFunctionsAndNeighbours() {
+        pyramidalFunctionMap = new HashMap<>();
+        neighboursMap = net.buildNeighboursSortedCounterClockwise();
         for (DiscretePoint point : net.getActivePointsMap().keySet()) {
+            List<Triangle> triangles = new ArrayList<>();
             List<DiscretePoint> neighbourhood = neighboursMap.get(point);
             DiscretePoint p1 = neighbourhood.get(neighbourhood.size() - 1);
             DiscretePoint p2;
             for (DiscretePoint neighbour : neighbourhood) {
                 p2 = neighbour;
                 if (!DiscretePoint.angleGEthan180(p1, point, p2)) {
-                    triangles.add(DrawingUtil.createTriangle(
-                            getCoordinates(p1, 1),
-                            getCoordinates(p2, 1),
-                            getCoordinates(point, 3)
-                    ));
+                    Triangle triangle = new Triangle(
+                            getPoint3D(p1, 0),
+                            getPoint3D(p2, 0),
+                            getPoint3D(point, 1)
+                    );
+                    triangles.add(triangle);
                 }
                 p1 = p2;
             }
+            pyramidalFunctionMap.put(point,
+                    new PyramidalFunction(getPoint2D(point), triangles, point));
         }
-        return new Shape(triangles);
     }
 
     public void degreeUp() {
@@ -99,7 +120,7 @@ public class BinaryTriangulation {
         List<Integer> yList = getDiscreteCoordinates(realY, bottom, top);
         for (int x : xList) {
             for (int y : yList) {
-                net.activate(new DiscretePoint(x, y, net.getGridDegree() + 1), ActivationType.FIRST);
+                net.activate(new DiscretePoint(x, y, net.getGridDegree() + 1));
             }
         }
     }
@@ -110,7 +131,7 @@ public class BinaryTriangulation {
         double factor = 1 << net.getGridDegree();
 
         double cellSize = (max - min) / factor;
-        double dCoordinate = realC / cellSize;
+        double dCoordinate = (realC - min) / cellSize;
 
         int c1 = (int) Math.floor(dCoordinate + EPS);
         int c2 = (int) Math.floor(dCoordinate - EPS);
@@ -124,13 +145,23 @@ public class BinaryTriangulation {
     }
 
     private Coord3d getCoordinates(DiscretePoint p) {
-        double factor = 1 << p.k; //2^k
-        return new Coord3d(p.x * (right - left) / factor + left, p.y * (top - bottom) / factor + bottom, 0);
+        Point3D point = getPoint3D(p, 0);
+        return new Coord3d(point.x, point.y, point.z);
     }
 
     private Coord3d getCoordinates(DiscretePoint p, double z) {
+        Point3D point = getPoint3D(p, z);
+        return new Coord3d(point.x, point.y, point.z);
+    }
+
+    private Point2D getPoint2D(DiscretePoint p) {
         double factor = 1 << p.k; //2^k
-        return new Coord3d(p.x * (right - left) / factor + left, p.y * (top - bottom) / factor + bottom, z);
+        return new Point2D(p.x * (right - left) / factor + left, p.y * (top - bottom) / factor + bottom);
+    }
+
+    private Point3D getPoint3D(DiscretePoint p, double z) {
+        double factor = 1 << p.k; //2^k
+        return new Point3D(p.x * (right - left) / factor + left, p.y * (top - bottom) / factor + bottom, z);
     }
 }
 

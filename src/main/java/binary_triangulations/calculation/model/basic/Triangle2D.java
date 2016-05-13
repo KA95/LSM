@@ -1,6 +1,5 @@
-package old.calculation.basic;
+package binary_triangulations.calculation.model.basic;
 
-import binary_triangulations.calculation.model.Point2D;
 import binary_triangulations.calculation.util.CalculationUtil;
 
 import java.util.ArrayList;

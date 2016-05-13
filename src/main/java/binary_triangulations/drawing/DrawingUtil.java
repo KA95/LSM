@@ -1,12 +1,10 @@
-package old.drawing.util;
+package binary_triangulations.drawing;
 
-import binary_triangulations.calculation.model.Point3D;
-import old.calculation.advanced.PyramidalFunction;
-import old.calculation.advanced.Triangulation;
-import old.calculation.basic.LinearFunction;
-import binary_triangulations.calculation.model.Point2D;
-import old.calculation.basic.Triangle;
-import old.calculation.basic.Triangle2D;
+import binary_triangulations.calculation.model.basic.Point3D;
+import binary_triangulations.calculation.model.PyramidalFunction;
+import binary_triangulations.calculation.model.basic.LinearFunction;
+import binary_triangulations.calculation.model.basic.Point2D;
+import binary_triangulations.calculation.model.basic.Triangle;
 import org.jzy3d.colors.Color;
 import org.jzy3d.maths.Coord3d;
 import org.jzy3d.plot3d.primitives.Point;
@@ -16,14 +14,6 @@ import java.util.*;
 
 
 public class DrawingUtil {
-
-    public static List<Polygon> createTriangulation(Triangulation tr) {
-        ArrayList<Polygon> result = new ArrayList<>();
-        for (Triangle2D t : tr.getTriangles()) {
-            result.add(createTriangle(new Triangle(t)));
-        }
-        return result;
-    }
 
     public static List<Polygon> createApproximation(List<Triangle> triangles) {
         ArrayList<Polygon> result = new ArrayList<>();
@@ -60,9 +50,6 @@ public class DrawingUtil {
     }
 
     public static Polygon createLine(Coord3d p1, Coord3d p2) {
-        System.out.println("DrawingUtil.createLine");
-        System.out.println("p1 = {" + p1.x + ", "+ p1.y + ", "+ p1.z + "}");
-        System.out.println("p2 = {" + p2.x + ", "+ p2.y + ", "+ p2.z + "}");
         return createTriangle(p1, p2, p2);
     }
 

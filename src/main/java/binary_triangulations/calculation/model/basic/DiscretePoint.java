@@ -1,4 +1,4 @@
-package binary_triangulations.calculation.model;
+package binary_triangulations.calculation.model.basic;
 
 import binary_triangulations.exception.ConstructionException;
 import lombok.EqualsAndHashCode;

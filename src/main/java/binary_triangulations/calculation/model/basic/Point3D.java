@@ -1,8 +1,6 @@
-package binary_triangulations.calculation.model;
+package binary_triangulations.calculation.model.basic;
 
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 @EqualsAndHashCode

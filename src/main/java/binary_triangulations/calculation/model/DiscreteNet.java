@@ -1,6 +1,7 @@
 package binary_triangulations.calculation.model;
 
 
+import binary_triangulations.calculation.model.basic.DiscretePoint;
 import binary_triangulations.exception.ConstructionException;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +28,7 @@ public class DiscreteNet {
         activePointsMap.put(p2.getPoint(), p2);
         activePointsMap.put(p3.getPoint(), p3);
         activePointsMap.put(p4.getPoint(), p4);
-        activate(new DiscretePoint(1, 1, 1), ActivationType.FIRST);
+        activate(new DiscretePoint(1, 1, 1));
         gridDegree = 1;
     }
 
@@ -39,26 +40,35 @@ public class DiscreteNet {
      * Activate points recursively with saving triangulation correctness.
      *
      * @param point point to activate
-     * @param type  activation type
      * @return new point of triangulation
      */
-    public DiscretePointDetailed activate(DiscretePoint point, ActivationType type) {
+    public DiscretePointDetailed activate(DiscretePoint point) {
+
+        ActivationType type;
+        if (insideCell(point)) {
+            type = ActivationType.FIRST;
+        }
+        else {
+            type = ActivationType.SECOND;
+        }
+
+        if (activePointsMap.containsKey(point)) {
+            System.out.println(point + "exists");
+            return activePointsMap.get(point);
+        }
         List<DiscretePoint> parentPoints;
         if (type == ActivationType.FIRST) {
             parentPoints = getParents1(point.x, point.y, point.k);
         } else {
             parentPoints = getParents2(point.x, point.y, point.k);
         }
-        checkParents(parentPoints, point);
+//        checkParents(parentPoints, point);
         ArrayList<DiscretePointDetailed> parents = new ArrayList<>();
         for (DiscretePoint parentPoint : parentPoints) {
             DiscretePointDetailed parentDetailed =
                     activePointsMap.containsKey(parentPoint)
                             ? activePointsMap.get(parentPoint)
-                            : (type == ActivationType.FIRST
-                            ? activate(parentPoint, ActivationType.SECOND)
-                            : activate(parentPoint, ActivationType.FIRST)
-                    );
+                          : activate(parentPoint);
             parents.add(parentDetailed);
         }
         cleanupParentEdges(parents, point);
@@ -67,11 +77,37 @@ public class DiscreteNet {
         return newPoint;
     }
 
+    private boolean insideCell(DiscretePoint parentPoint) {
+        return (parentPoint.x & 1) + (parentPoint.y & 1) == 2;
+    }
+
     public Map<DiscretePoint, List<DiscretePoint>> buildNeighboursSortedCounterClockwise() {
         Map<DiscretePoint, List<DiscretePoint>> result = buildNeighbours();
         for (Map.Entry<DiscretePoint, List<DiscretePoint>> entry : result.entrySet()) {
             sortPointsCounterClockwise(entry.getKey(), entry.getValue());
         }
+        return result;
+    }
+
+    public Map<DiscretePoint, List<DiscretePoint>> buildNeighbours() {
+        Map<DiscretePoint, List<DiscretePoint>> result = new HashMap<>();
+
+        for (DiscretePoint point : activePointsMap.keySet()) {
+            result.put(point, new ArrayList<>());
+        }
+
+        for (Map.Entry<DiscretePoint, DiscretePointDetailed> entry : activePointsMap.entrySet()) {
+            DiscretePoint currentPoint = entry.getKey();
+            List<DiscretePoint> neighbours = result.get(entry.getKey());
+            List<DiscretePointDetailed> parents = entry.getValue().getParents();
+            if (parents != null) {
+                neighbours.addAll(parents.stream().map(DiscretePointDetailed::getPoint).collect(Collectors.toList()));
+                for (DiscretePointDetailed parent : parents) {
+                    result.get(parent.getPoint()).add(currentPoint);
+                }
+            }
+        }
+
         return result;
     }
 
@@ -198,27 +234,5 @@ public class DiscreteNet {
         p1 = p1.getNotNormalForm(maxK);
         p2 = p2.getNotNormalForm(maxK);
         return new DiscretePoint(p1.x + p2.x, p1.y + p2.y, maxK + 1);
-    }
-
-    private Map<DiscretePoint, List<DiscretePoint>> buildNeighbours() {
-        Map<DiscretePoint, List<DiscretePoint>> result = new HashMap<>();
-
-        for (DiscretePoint point : activePointsMap.keySet()) {
-            result.put(point, new ArrayList<>());
-        }
-
-        for (Map.Entry<DiscretePoint, DiscretePointDetailed> entry : activePointsMap.entrySet()) {
-            DiscretePoint currentPoint = entry.getKey();
-            List<DiscretePoint> neighbours = result.get(entry.getKey());
-            List<DiscretePointDetailed> parents = entry.getValue().getParents();
-            if (parents != null) {
-                neighbours.addAll(parents.stream().map(DiscretePointDetailed::getPoint).collect(Collectors.toList()));
-                for (DiscretePointDetailed parent : parents) {
-                    result.get(parent.getPoint()).add(currentPoint);
-                }
-            }
-        }
-
-        return result;
     }
 }

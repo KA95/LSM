@@ -1,7 +1,7 @@
 package binary_triangulations.calculation.util;
 
-import binary_triangulations.calculation.model.Point2D;
-import old.calculation.basic.Triangle2D;
+import binary_triangulations.calculation.model.basic.Point2D;
+import binary_triangulations.calculation.model.basic.Triangle2D;
 
 public class CalculationUtil {
     public static final double EPS = 1e-7;

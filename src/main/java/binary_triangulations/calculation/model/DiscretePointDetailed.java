@@ -1,5 +1,6 @@
 package binary_triangulations.calculation.model;
 
+import binary_triangulations.calculation.model.basic.DiscretePoint;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
