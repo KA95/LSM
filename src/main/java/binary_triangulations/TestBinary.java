@@ -38,7 +38,7 @@ public class TestBinary {
 
         for (int i = 1; i < TR_POINTS; i++) {
             for (int j = 1; j < TR_POINTS; j++) {
-                triangulation.refine(i * (RIGHT - LEFT) / TR_POINTS, j * (TOP - BOTTOM) / TR_POINTS);
+                triangulation.refine(i * (RIGHT - LEFT) / TR_POINTS + LEFT, j * (TOP - BOTTOM) / TR_POINTS + BOTTOM);
             }
         }
 
@@ -50,10 +50,8 @@ public class TestBinary {
                 new ArrayList<>(triangulation.getPyramidalFunctionMap().keySet()),
                 triangulation.getPyramidalFunctionMap(),
                 triangulation.getNeighboursMap());
-//        solver.getCoefficients();
         Thread.sleep(2000);
         btAnalysis.drawApproximation(solver.getCoefficients());
-//        btAnalysis.updateTriangulation(triangulation);
 ////////////////////////////
 
 //        MainSolver.getCoefficients();

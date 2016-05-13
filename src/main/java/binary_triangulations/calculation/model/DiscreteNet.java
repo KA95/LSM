@@ -28,7 +28,7 @@ public class DiscreteNet {
         activePointsMap.put(p2.getPoint(), p2);
         activePointsMap.put(p3.getPoint(), p3);
         activePointsMap.put(p4.getPoint(), p4);
-        activate(new DiscretePoint(1, 1, 1));
+        activate(new DiscretePoint(1, 1, 1), null);
         gridDegree = 1;
     }
 
@@ -42,7 +42,7 @@ public class DiscreteNet {
      * @param point point to activate
      * @return new point of triangulation
      */
-    public DiscretePointDetailed activate(DiscretePoint point) {
+    public DiscretePointDetailed activate(DiscretePoint point, DiscretePoint prev) {
 
         if (activePointsMap.containsKey(point)) {
             System.out.println(point + "exists");
@@ -57,9 +57,6 @@ public class DiscreteNet {
             type = ActivationType.SECOND;
         }
 
-        //to avoid infinite loop
-//        activePointsMap.put(point, null);
-
         List<DiscretePoint> parentPoints;
         if (type == ActivationType.FIRST) {
             parentPoints = getParents1(point.x, point.y, point.k);
@@ -69,15 +66,17 @@ public class DiscreteNet {
 
         ArrayList<DiscretePointDetailed> parents = new ArrayList<>();
         for (DiscretePoint parentPoint : parentPoints) {
+            if(parentPoint.equals(prev)) {
+                continue;
+            }
             DiscretePointDetailed parentDetailed =
                     activePointsMap.containsKey(parentPoint)
                             ? activePointsMap.get(parentPoint)
-                          : activate(parentPoint);
+                          : activate(parentPoint, point);
             parents.add(parentDetailed);
         }
         cleanupParentEdges(parents, point);
         DiscretePointDetailed newPoint = new DiscretePointDetailed(point, parents);
-        //updated with info about parents
         activePointsMap.put(newPoint.getPoint(), newPoint);
         return newPoint;
     }

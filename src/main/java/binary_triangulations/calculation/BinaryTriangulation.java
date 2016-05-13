@@ -120,7 +120,7 @@ public class BinaryTriangulation {
         List<Integer> yList = getDiscreteCoordinates(realY, bottom, top);
         for (int x : xList) {
             for (int y : yList) {
-                net.activate(new DiscretePoint(x, y, net.getGridDegree() + 1));
+                net.activate(new DiscretePoint(x, y, net.getGridDegree() + 1), null);
             }
         }
     }
