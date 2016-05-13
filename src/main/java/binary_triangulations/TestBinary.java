@@ -15,12 +15,13 @@ import java.util.List;
 
 public class TestBinary {
 
-    private static final double TOP = 1;
-    private static final double BOTTOM = -1;
-    private static final double RIGHT = 1;
-    private static final double LEFT = -1;
+    private static final double TOP = 2;
+    private static final double BOTTOM = -2;
+    private static final double RIGHT = 2;
+    private static final double LEFT = -2;
 
-    private static final long POINTS_COUNT = 100;
+    private static final long POINTS_COUNT = 20000;
+    public static final int TR_POINTS = 7;
 
     public static void main(String[] args) throws Exception {
         BTAnalysis btAnalysis = new BTAnalysis();
@@ -29,19 +30,35 @@ public class TestBinary {
         btAnalysis.setPoints(points);
 
         BinaryTriangulation triangulation = new BinaryTriangulation(LEFT, BOTTOM, RIGHT, TOP);
+        triangulation.degreeUp();
+        triangulation.degreeUp();
+        triangulation.degreeUp();
+        triangulation.degreeUp();
+        triangulation.degreeUp();
+
+        for (int i = 1; i < TR_POINTS; i++) {
+            for (int j = 1; j < TR_POINTS; j++) {
+                triangulation.refine(i * (RIGHT - LEFT) / TR_POINTS, j * (TOP - BOTTOM) / TR_POINTS);
+            }
+        }
+
         btAnalysis.setTriangulation(triangulation);
         AnalysisLauncher.open(btAnalysis);
 ////////////////////////////
-        triangulation.buildPyramidalFunctionsShape(); //initializes pyramidal
-
-//        MainSolver solver = new MainSolver(points,
-//                new ArrayList<>(triangulation.getPyramidalFunctionMap().values()));
+        triangulation.updatePyramidalFunctionsAndNeighbours();
+        MainSolver solver = new MainSolver(points,
+                new ArrayList<>(triangulation.getPyramidalFunctionMap().keySet()),
+                triangulation.getPyramidalFunctionMap(),
+                triangulation.getNeighboursMap());
 //        solver.getCoefficients();
+        Thread.sleep(2000);
+        btAnalysis.drawApproximation(solver.getCoefficients());
+//        btAnalysis.updateTriangulation(triangulation);
 ////////////////////////////
 
 //        MainSolver.getCoefficients();
 
-        testTriangulation(btAnalysis, triangulation);
+//        testTriangulation(btAnalysis, triangulation);
 //
 //        points.clear();
 //

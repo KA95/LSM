@@ -1,6 +1,7 @@
 package binary_triangulations.drawing;
 
 import binary_triangulations.calculation.BinaryTriangulation;
+import binary_triangulations.calculation.model.basic.DiscretePoint;
 import binary_triangulations.calculation.model.basic.Point3D;
 import lombok.Setter;
 import org.jzy3d.analysis.AbstractAnalysis;
@@ -12,6 +13,7 @@ import org.jzy3d.plot3d.primitives.Scatter;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
 
 import java.util.List;
+import java.util.Map;
 
 @Setter
 public class BTAnalysis extends AbstractAnalysis {
@@ -37,6 +39,13 @@ public class BTAnalysis extends AbstractAnalysis {
         chart.updateProjectionsAndRender();
     }
 
+    public void drawApproximation(Map<DiscretePoint, Double> coefficients) {
+        chart.getScene().getGraph().getAll().clear();
+        drawPointSet();
+        draw(triangulation.buildApproximationShape(coefficients));
+        chart.updateProjectionsAndRender();
+    }
+
     public void drawPyramidalFunctions() {
         draw(triangulation.buildPyramidalFunctionsShape());
         chart.updateProjectionsAndRender();
@@ -55,7 +64,7 @@ public class BTAnalysis extends AbstractAnalysis {
             Point3D p = points.get(i);
             newPoints[i] = new Coord3d(p.x, p.y, p.z);
         }
-        pointsScatter = new Scatter(newPoints, Color.BLACK, 3f);
+        pointsScatter = new Scatter(newPoints, Color.BLACK, 1f);
         draw(pointsScatter);
     }
 

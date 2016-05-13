@@ -14,6 +14,11 @@ public class PyramidalFunction {
     Point2D center;
     List<Triangle> parts;
 
+    private double xmax;
+    private double xmin;
+    private double ymax;
+    private double ymin;
+
     public List<Triangle> getParts() {
         return parts;
     }
@@ -22,14 +27,25 @@ public class PyramidalFunction {
         this.center = center;
         this.parts = parts;
         this.discreteCenter = discreteCenter;
+        for (Triangle t : parts) {
+            for (Point3D p : t.getVerticesList()) {
+                xmax = Math.max(xmax, p.x);
+                ymax = Math.max(ymax, p.y);
+                xmin = Math.min(xmin, p.x);
+                ymin = Math.min(ymin, p.y);
+            }
+        }
     }
 
     public double getValue(double x, double y) {
-        for(Triangle tr : parts) {
+        if (!(xmin < x && x < xmax && ymin < y && y < ymax))
+            return 0;
+
+        for (Triangle tr : parts) {
             Triangle2D t2d = new Triangle2D(tr);
-            if(CalculationUtil.isPointInsideTriangle(t2d, new Point2D(x,y))) {
+            if (CalculationUtil.isPointInsideTriangle(t2d, new Point2D(x, y))) {
                 LinearFunction lf = new LinearFunction(tr);
-                return lf.calculateZ(x,y);
+                return lf.calculateZ(x, y);
             }
         }
         return 0;

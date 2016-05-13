@@ -44,6 +44,11 @@ public class DiscreteNet {
      */
     public DiscretePointDetailed activate(DiscretePoint point) {
 
+        if (activePointsMap.containsKey(point)) {
+            System.out.println(point + "exists");
+            return activePointsMap.get(point);
+        }
+
         ActivationType type;
         if (insideCell(point)) {
             type = ActivationType.FIRST;
@@ -52,17 +57,16 @@ public class DiscreteNet {
             type = ActivationType.SECOND;
         }
 
-        if (activePointsMap.containsKey(point)) {
-            System.out.println(point + "exists");
-            return activePointsMap.get(point);
-        }
+        //to avoid infinite loop
+//        activePointsMap.put(point, null);
+
         List<DiscretePoint> parentPoints;
         if (type == ActivationType.FIRST) {
             parentPoints = getParents1(point.x, point.y, point.k);
         } else {
             parentPoints = getParents2(point.x, point.y, point.k);
         }
-//        checkParents(parentPoints, point);
+
         ArrayList<DiscretePointDetailed> parents = new ArrayList<>();
         for (DiscretePoint parentPoint : parentPoints) {
             DiscretePointDetailed parentDetailed =
@@ -73,6 +77,7 @@ public class DiscreteNet {
         }
         cleanupParentEdges(parents, point);
         DiscretePointDetailed newPoint = new DiscretePointDetailed(point, parents);
+        //updated with info about parents
         activePointsMap.put(newPoint.getPoint(), newPoint);
         return newPoint;
     }
