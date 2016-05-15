@@ -7,10 +7,7 @@ import binary_triangulations.calculation.model.basic.Point3D;
 import org.jblas.DoubleMatrix;
 import org.jblas.Solve;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Calculates coefficients vector c for given point-set
@@ -18,7 +15,8 @@ import java.util.Map;
  */
 public class MainSolver {
 
-    private static final double EPS = 0.3;
+    private static final double EPS = 0.1;
+    public static final int SMOOTH_MULTIPLIER = 1;
 
     private List<Point3D> initialPoints;
     private List<DiscretePoint> triangulationPoints;
@@ -68,7 +66,7 @@ public class MainSolver {
 
 
         //smoothing parameter
-        double lambda = getFrobeniusNorm(BtB, n) / getFrobeniusNorm(E, n);
+        double lambda = getFrobeniusNorm(BtB, n) / getFrobeniusNorm(E, n) * SMOOTH_MULTIPLIER;
 
         //BtB + lambda*E
 
@@ -138,9 +136,11 @@ public class MainSolver {
         long start = System.nanoTime();
         double[][] E = new double[n][n];
         for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                for (int k = 0; k < n; k++) {
-                    E[i][j] = E[i][j] + P[i][k] * P[j][k];
+            for (int k = 0; k < n; k++) {
+                if (P[i][k] != 0) {
+                    for (int j = 0; j < n; j++) {
+                        E[i][j] = E[i][j] + P[i][k] * P[j][k];
+                    }
                 }
             }
         }
@@ -189,36 +189,96 @@ public class MainSolver {
     }
 
     private double[][] getBTBMatrix(int n) {
-        System.out.println("calculating BtB");
+        System.out.println("Calculating BtB --->");
+
+        List<PyramidalFunction> pf = getPyramidalFunctionsList(n);
+        List<List<DiscretePoint>> neighboursList = getNeighboursListsList(n);
+        boolean[][] haveCommonNeighbour = haveCommonNeighboursMatrix(n, neighboursList);
+        double[][] pfvalue = getPyramidalFunctionsValues(n, pf);
+
+        System.out.println("calculating BtB matrix");
         long start = System.nanoTime();
 
         double[][] btb = new double[n][n];
-
-        double[][] pfvalue = new double[n][initialPoints.size()];
-
-        List<PyramidalFunction> pf = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            pf.add(pyramidalFunctionsMap.get(triangulationPoints.get(i)));
-        }
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < initialPoints.size(); j++) {
-                Point3D p = initialPoints.get(j);
-                pfvalue[i][j] = pf.get(i).getValue(p.x, p.y);
-            }
-        }
-
         for (int i = 0; i < n; i++) {
             for (int j = i; j < n; j++) {
-                for (int k = 0; k < initialPoints.size(); k++) {
-                    btb[i][j] = btb[i][j] + pfvalue[i][k] * pfvalue[j][k];
-                    btb[j][i] = btb[i][j];
+                if (haveCommonNeighbour[i][j]) {
+                    for (int k = 0; k < initialPoints.size(); k++) {
+                        btb[i][j] = btb[i][j] + pfvalue[i][k] * pfvalue[j][k];
+                        btb[j][i] = btb[i][j];
+                    }
+                } else {
+                    btb[i][j] = btb[j][i] = 0;
                 }
             }
         }
         long end = System.nanoTime();
         System.out.println("time : " + (end - start) / 1000000 + " ms");
 
+        System.out.println("<---");
         return btb;
+    }
+
+    private double[][] getPyramidalFunctionsValues(int n, List<PyramidalFunction> pf) {
+        System.out.println("Calculating Values of pyramidal functions in given points...");
+        long start = System.nanoTime();
+        double[][] pfvalue = new double[n][initialPoints.size()];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < initialPoints.size(); j++) {
+                Point3D p = initialPoints.get(j);
+                pfvalue[i][j] = pf.get(i).getValue(p.x, p.y);
+            }
+        }
+        long end = System.nanoTime();
+        System.out.println("time : " + (end - start) / 1000000 + " ms");
+        return pfvalue;
+    }
+
+    private boolean[][] haveCommonNeighboursMatrix(int n, List<List<DiscretePoint>> neighboursList) {
+        System.out.println("Calculating utility matrix...");
+        long start = System.nanoTime();
+
+        boolean[][] haveCommonNeighbour = new boolean[n][n];
+        for (int i = 0; i < n; i++) {
+            Set<DiscretePoint> neighbours = new HashSet<>();
+            neighbours.addAll(neighboursList.get(i));
+            for (int j = 0; j < n; j++) {
+                haveCommonNeighbour[i][j] = false;
+                for (DiscretePoint p : neighboursList.get(j)) {
+                    if (neighbours.contains(p)) {
+                        haveCommonNeighbour[i][j] = true;
+                        break;
+                    }
+                }
+            }
+        }
+        long end = System.nanoTime();
+        System.out.println("time : " + (end - start) / 1000000 + " ms");
+        return haveCommonNeighbour;
+    }
+
+    private List<List<DiscretePoint>> getNeighboursListsList(double n) {
+        System.out.println("Listing neighbours lists...");
+        long start = System.nanoTime();
+        List<List<DiscretePoint>> neighboursList = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            neighboursList.add(neighboursMap.get(triangulationPoints.get(i)));
+        }
+        long end = System.nanoTime();
+        System.out.println("time : " + (end - start) / 1000000 + " ms");
+        return neighboursList;
+    }
+
+    private List<PyramidalFunction> getPyramidalFunctionsList(double n) {
+        List<PyramidalFunction> pf = new ArrayList<>();
+        System.out.println("Listing pyramidal functions... ");
+        long start = System.nanoTime();
+
+        for (int i = 0; i < n; i++) {
+            pf.add(pyramidalFunctionsMap.get(triangulationPoints.get(i)));
+        }
+        long end = System.nanoTime();
+        System.out.println("time : " + (end - start) / 1000000 + " ms");
+        return pf;
     }
 }

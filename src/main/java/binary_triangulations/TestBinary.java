@@ -15,13 +15,13 @@ import java.util.List;
 
 public class TestBinary {
 
-    private static final double TOP = 3;
-    private static final double BOTTOM = -3;
-    private static final double RIGHT = 3;
-    private static final double LEFT = -3;
+    private static final double TOP = 4;
+    private static final double BOTTOM = -4;
+    private static final double RIGHT = 4;
+    private static final double LEFT = -4;
 
     private static final long POINTS_COUNT = 3000;
-    public static final int MAX_DEPTH = 7;
+    public static final int MAX_DEPTH = 9;
 
     public static void main(String[] args) throws Exception {
         BTAnalysis btAnalysis = new BTAnalysis();
