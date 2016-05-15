@@ -45,7 +45,6 @@ public class DiscreteNet {
     public DiscretePointDetailed activate(DiscretePoint point, DiscretePoint prev) {
 
         if (activePointsMap.containsKey(point)) {
-            System.out.println(point + "exists");
             return activePointsMap.get(point);
         }
 

@@ -20,7 +20,8 @@ public class TestBinary {
     private static final double RIGHT = 3;
     private static final double LEFT = -3;
 
-    private static final long POINTS_COUNT = 1000;
+    private static final long POINTS_COUNT = 3000;
+    public static final int MAX_DEPTH = 7;
 
     public static void main(String[] args) throws Exception {
         BTAnalysis btAnalysis = new BTAnalysis();
@@ -33,16 +34,16 @@ public class TestBinary {
         AnalysisLauncher.open(btAnalysis);
 
         List<Point2D> pointsToRefine;
+        long depth = 1;
         do {
             triangulation.updatePyramidalFunctionsAndNeighbours();
-
             MainSolver solver = new MainSolver(points,
                     new ArrayList<>(triangulation.getPyramidalFunctionMap().keySet()),
                     triangulation.getPyramidalFunctionMap(),
                     triangulation.getNeighboursMap());
             solver.solve();
             System.out.println("Sleeping");
-            Thread.sleep(2000);
+            Thread.sleep(500);
             System.out.println("Drawing...");
             btAnalysis.drawApproximation(solver.getCoefficients());
             System.out.println("Done.");
@@ -53,7 +54,11 @@ public class TestBinary {
             }
 
             triangulation.degreeUp();
-
+            depth++;
+            if (depth > MAX_DEPTH) {
+                System.out.println("DEPTH EXCEEDED");
+                break;
+            }
         } while (pointsToRefine.size() > 0);
 
         System.out.println("THE END");

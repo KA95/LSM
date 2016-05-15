@@ -4,9 +4,8 @@ import binary_triangulations.calculation.model.PyramidalFunction;
 import binary_triangulations.calculation.model.basic.DiscretePoint;
 import binary_triangulations.calculation.model.basic.Point2D;
 import binary_triangulations.calculation.model.basic.Point3D;
-import lombok.AllArgsConstructor;
-import org.apache.commons.math3.linear.*;
-import org.apache.log4j.xml.DOMConfigurator;
+import org.jblas.DoubleMatrix;
+import org.jblas.Solve;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +18,7 @@ import java.util.Map;
  */
 public class MainSolver {
 
-    private static final double EPS = 0.1;
+    private static final double EPS = 0.3;
 
     private List<Point3D> initialPoints;
     private List<DiscretePoint> triangulationPoints;
@@ -53,38 +52,63 @@ public class MainSolver {
 
     public void solve() {
         int n = triangulationPoints.size();
+        System.out.println("n = " + n);
 
         //matrix BtB
-        RealMatrix BtB = new Array2DRowRealMatrix(getBTBMatrix(n));
+        double[][] BtB = getBTBMatrix(n);
 
-        //vector BtZ
-        RealVector BtZ = new ArrayRealVector(getBTZVector(n));
+        //column BtZ
+        DoubleMatrix BtZ1 = new DoubleMatrix(getBTZColumn(n));
 
         //umbrella operator
         double[][] P = getPreprocessedP(n);
 
         //smoothing term
-        RealMatrix E = new Array2DRowRealMatrix(getEMatrix(n, P));
+        double[][] E = getEMatrix(n, P);
+
 
         //smoothing parameter
-        double lambda = BtB.getFrobeniusNorm() / E.getFrobeniusNorm() * 10;
+        double lambda = getFrobeniusNorm(BtB, n) / getFrobeniusNorm(E, n);
+
+        //BtB + lambda*E
+
+        int zeros = 0;
+        double[][] A = new double[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                A[i][j] = BtB[i][j] + lambda * E[i][j];
+                if (A[i][j] == 0) zeros++;
+            }
+        }
+
+        System.out.println("zeros = " + zeros);
 
         System.out.println(String.format("Solving system %dx%d...", n, n));
         long start = System.nanoTime();
-        RealMatrix coefficients = BtB.add(E.scalarMultiply(lambda));
-        DecompositionSolver solver = new LUDecomposition(coefficients).getSolver();
-        RealVector solution = solver.solve(BtZ);
+
+        DoubleMatrix A1 = new DoubleMatrix(A);
+        DoubleMatrix solution = Solve.solveSymmetric(A1, BtZ1);
         long end = System.nanoTime();
-        System.out.println("Solved. " + (end - start)/1000000 + " ms");
+        System.out.println("Solved. " + (end - start) / 1000000 + " ms");
+
 
         Map<DiscretePoint, Double> result = new HashMap<>();
-        for (int i = 0; i < solution.getDimension(); i++) {
-            System.out.println(String.format("c%d: %f", i, solution.getEntry(i)));
-            result.put(triangulationPoints.get(i), solution.getEntry(i));
+        for (int i = 0; i < n; i++) {
+            result.put(triangulationPoints.get(i), solution.get(i, 0));
         }
 
         this.coefficients = result;
         calculateDeviation();
+    }
+
+    private double getFrobeniusNorm(double[][] a, int n) {
+        double sum = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                sum = sum + a[i][j] * a[i][j];
+            }
+        }
+        return Math.sqrt(sum);
     }
 
     private void calculateDeviation() {
@@ -110,6 +134,8 @@ public class MainSolver {
     }
 
     private double[][] getEMatrix(int n, double[][] P) {
+        System.out.println("Calculating smoothing term");
+        long start = System.nanoTime();
         double[][] E = new double[n][n];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
@@ -118,11 +144,15 @@ public class MainSolver {
                 }
             }
         }
+        long end = System.nanoTime();
+        System.out.println("time : " + (end - start) / 1000000 + " ms");
         return E;
     }
 
     //for umbrella-operator
     private double[][] getPreprocessedP(int n) {
+        System.out.println("Pre-processing for umbrella-operator");
+        long start = System.nanoTime();
         double[][] P = new double[n][n];
 
         for (int l = 0; l < n; l++) {
@@ -136,24 +166,33 @@ public class MainSolver {
                 }
             }
         }
-
+        long end = System.nanoTime();
+        System.out.println("time : " + (end - start) / 1000000 + " ms");
         return P;
     }
 
-    private double[] getBTZVector(int n) {
-        double[] btz = new double[n];
+    private double[][] getBTZColumn(int n) {
+        System.out.println("calculating BtZ");
+        long start = System.nanoTime();
+
+        double[][] btz = new double[n][1];
         for (int i = 0; i < n; i++) {
             for (Point3D p : initialPoints) {
                 PyramidalFunction pf = pyramidalFunctionsMap.get(triangulationPoints.get(i));
-                btz[i] = btz[i] + pf.getValue(p.x, p.y) * p.z;
+                btz[i][0] = btz[i][0] + pf.getValue(p.x, p.y) * p.z;
             }
         }
+
+        long end = System.nanoTime();
+        System.out.println("time : " + (end - start) / 1000000 + " ms");
         return btz;
     }
 
     private double[][] getBTBMatrix(int n) {
-        double[][] btb = new double[n][n];
+        System.out.println("calculating BtB");
+        long start = System.nanoTime();
 
+        double[][] btb = new double[n][n];
 
         double[][] pfvalue = new double[n][initialPoints.size()];
 
@@ -170,17 +209,15 @@ public class MainSolver {
         }
 
         for (int i = 0; i < n; i++) {
-            System.out.println("i = " + i);
-            long start = System.nanoTime();
             for (int j = i; j < n; j++) {
                 for (int k = 0; k < initialPoints.size(); k++) {
                     btb[i][j] = btb[i][j] + pfvalue[i][k] * pfvalue[j][k];
                     btb[j][i] = btb[i][j];
                 }
             }
-            long end = System.nanoTime();
-            System.out.println("time : " + (end - start) / 1000000 + " ms");
         }
+        long end = System.nanoTime();
+        System.out.println("time : " + (end - start) / 1000000 + " ms");
 
         return btb;
     }
