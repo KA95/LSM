@@ -2,6 +2,7 @@ package binary_triangulations.calculation;
 
 import binary_triangulations.calculation.model.PyramidalFunction;
 import binary_triangulations.calculation.model.basic.DiscretePoint;
+import binary_triangulations.calculation.model.basic.Point2D;
 import binary_triangulations.calculation.model.basic.Point3D;
 import lombok.AllArgsConstructor;
 import org.apache.commons.math3.linear.*;
@@ -16,15 +17,41 @@ import java.util.Map;
  * Calculates coefficients vector c for given point-set
  * and triangulation's pyramidal functions.
  */
-@AllArgsConstructor
 public class MainSolver {
+
+    private static final double EPS = 0.1;
 
     private List<Point3D> initialPoints;
     private List<DiscretePoint> triangulationPoints;
     private Map<DiscretePoint, PyramidalFunction> pyramidalFunctionsMap;
     private Map<DiscretePoint, List<DiscretePoint>> neighboursMap;
 
+    private Map<DiscretePoint, Double> coefficients = null;
+
+    private List<Double> deviation = null;
+
+    private List<Point2D> pointsToRefine = null;
+
     public Map<DiscretePoint, Double> getCoefficients() {
+        return coefficients;
+    }
+
+    public List<Double> getDeviation() {
+        return deviation;
+    }
+
+    public List<Point2D> getPointsToRefine() {
+        return pointsToRefine;
+    }
+
+    public MainSolver(List<Point3D> initialPoints, List<DiscretePoint> triangulationPoints, Map<DiscretePoint, PyramidalFunction> pyramidalFunctionsMap, Map<DiscretePoint, List<DiscretePoint>> neighboursMap) {
+        this.initialPoints = initialPoints;
+        this.triangulationPoints = triangulationPoints;
+        this.pyramidalFunctionsMap = pyramidalFunctionsMap;
+        this.neighboursMap = neighboursMap;
+    }
+
+    public void solve() {
         int n = triangulationPoints.size();
 
         //matrix BtB
@@ -40,19 +67,46 @@ public class MainSolver {
         RealMatrix E = new Array2DRowRealMatrix(getEMatrix(n, P));
 
         //smoothing parameter
-        double lambda = BtB.getFrobeniusNorm() / E.getFrobeniusNorm();
+        double lambda = BtB.getFrobeniusNorm() / E.getFrobeniusNorm() * 10;
 
+        System.out.println(String.format("Solving system %dx%d...", n, n));
+        long start = System.nanoTime();
         RealMatrix coefficients = BtB.add(E.scalarMultiply(lambda));
         DecompositionSolver solver = new LUDecomposition(coefficients).getSolver();
-
         RealVector solution = solver.solve(BtZ);
+        long end = System.nanoTime();
+        System.out.println("Solved. " + (end - start)/1000000 + " ms");
 
         Map<DiscretePoint, Double> result = new HashMap<>();
         for (int i = 0; i < solution.getDimension(); i++) {
             System.out.println(String.format("c%d: %f", i, solution.getEntry(i)));
             result.put(triangulationPoints.get(i), solution.getEntry(i));
         }
-        return result;
+
+        this.coefficients = result;
+        calculateDeviation();
+    }
+
+    private void calculateDeviation() {
+        System.out.println("Calculating deviation.");
+        long start = System.nanoTime();
+        List<Double> deviation = new ArrayList<>();
+        List<Point2D> pointsToRefine = new ArrayList<>();
+        for (Point3D p3d : initialPoints) {
+            double f = 0;
+            for (DiscretePoint p : triangulationPoints) {
+                f = f + coefficients.get(p) * pyramidalFunctionsMap.get(p).getValue(p3d.x, p3d.y);
+            }
+            double d = Math.abs(f - p3d.z);
+            deviation.add(d);
+            if (d > EPS) {
+                pointsToRefine.add(new Point2D(p3d));
+            }
+        }
+        this.deviation = deviation;
+        this.pointsToRefine = pointsToRefine;
+        long end = System.nanoTime();
+        System.out.println("Finished. " + (end - start) / 1000000 + " ms");
     }
 
     private double[][] getEMatrix(int n, double[][] P) {

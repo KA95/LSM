@@ -15,13 +15,12 @@ import java.util.List;
 
 public class TestBinary {
 
-    private static final double TOP = 2;
-    private static final double BOTTOM = -2;
-    private static final double RIGHT = 2;
-    private static final double LEFT = -2;
+    private static final double TOP = 3;
+    private static final double BOTTOM = -3;
+    private static final double RIGHT = 3;
+    private static final double LEFT = -3;
 
-    private static final long POINTS_COUNT = 20;
-    public static final int TR_POINTS = 3;
+    private static final long POINTS_COUNT = 1000;
 
     public static void main(String[] args) throws Exception {
         BTAnalysis btAnalysis = new BTAnalysis();
@@ -30,38 +29,34 @@ public class TestBinary {
         btAnalysis.setPoints(points);
 
         BinaryTriangulation triangulation = new BinaryTriangulation(LEFT, BOTTOM, RIGHT, TOP);
-        triangulation.degreeUp();
-        triangulation.degreeUp();
-        triangulation.degreeUp();
-        triangulation.degreeUp();
-
-        for (int i = 1; i < TR_POINTS; i++) {
-            for (int j = 1; j < TR_POINTS; j++) {
-                triangulation.refine(i * (RIGHT - LEFT) / TR_POINTS + LEFT, j * (TOP - BOTTOM) / TR_POINTS + BOTTOM);
-            }
-        }
-
         btAnalysis.setTriangulation(triangulation);
         AnalysisLauncher.open(btAnalysis);
-////////////////////////////
-        triangulation.updatePyramidalFunctionsAndNeighbours();
-        MainSolver solver = new MainSolver(points,
-                new ArrayList<>(triangulation.getPyramidalFunctionMap().keySet()),
-                triangulation.getPyramidalFunctionMap(),
-                triangulation.getNeighboursMap());
-        Thread.sleep(2000);
-        btAnalysis.drawApproximation(solver.getCoefficients());
-////////////////////////////
 
-//        MainSolver.getCoefficients();
+        List<Point2D> pointsToRefine;
+        do {
+            triangulation.updatePyramidalFunctionsAndNeighbours();
 
-//        testTriangulation(btAnalysis, triangulation);
-//
-//        points.clear();
-//
-//        btAnalysis.updatePoints(points);
-//
-//        testPyramidalFunction();
+            MainSolver solver = new MainSolver(points,
+                    new ArrayList<>(triangulation.getPyramidalFunctionMap().keySet()),
+                    triangulation.getPyramidalFunctionMap(),
+                    triangulation.getNeighboursMap());
+            solver.solve();
+            System.out.println("Sleeping");
+            Thread.sleep(2000);
+            System.out.println("Drawing...");
+            btAnalysis.drawApproximation(solver.getCoefficients());
+            System.out.println("Done.");
+            pointsToRefine = solver.getPointsToRefine();
+
+            for (Point2D p : pointsToRefine) {
+                triangulation.refine(p.x, p.y);
+            }
+
+            triangulation.degreeUp();
+
+        } while (pointsToRefine.size() > 0);
+
+        System.out.println("THE END");
     }
 
     private static List<Point3D> generatePoints() {

@@ -64,7 +64,7 @@ public class BTAnalysis extends AbstractAnalysis {
             Point3D p = points.get(i);
             newPoints[i] = new Coord3d(p.x, p.y, p.z);
         }
-        pointsScatter = new Scatter(newPoints, Color.BLACK, 2f);
+        pointsScatter = new Scatter(newPoints, Color.RED, 2f);
         draw(pointsScatter);
     }
 
