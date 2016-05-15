@@ -20,8 +20,8 @@ public class TestBinary {
     private static final double RIGHT = 2;
     private static final double LEFT = -2;
 
-    private static final long POINTS_COUNT = 20000;
-    public static final int TR_POINTS = 7;
+    private static final long POINTS_COUNT = 20;
+    public static final int TR_POINTS = 3;
 
     public static void main(String[] args) throws Exception {
         BTAnalysis btAnalysis = new BTAnalysis();
@@ -30,7 +30,6 @@ public class TestBinary {
         btAnalysis.setPoints(points);
 
         BinaryTriangulation triangulation = new BinaryTriangulation(LEFT, BOTTOM, RIGHT, TOP);
-        triangulation.degreeUp();
         triangulation.degreeUp();
         triangulation.degreeUp();
         triangulation.degreeUp();

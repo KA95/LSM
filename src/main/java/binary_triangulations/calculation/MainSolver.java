@@ -60,7 +60,7 @@ public class MainSolver {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 for (int k = 0; k < n; k++) {
-                    E[i][j] = P[i][k] * P[j][k];
+                    E[i][j] = E[i][j] + P[i][k] * P[j][k];
                 }
             }
         }
@@ -71,14 +71,14 @@ public class MainSolver {
     private double[][] getPreprocessedP(int n) {
         double[][] P = new double[n][n];
 
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (i == j) {
-                    P[i][j] = -1;
-                } else if (neighboursMap.get(triangulationPoints.get(i)).contains(triangulationPoints.get(j))) {
-                    P[i][j] = 1.0 / neighboursMap.get(triangulationPoints.get(j)).size();
+        for (int l = 0; l < n; l++) {
+            for (int k = 0; k < n; k++) {
+                if (l == k) {
+                    P[l][k] = -1;
+                } else if (neighboursMap.get(triangulationPoints.get(l)).contains(triangulationPoints.get(k))) {
+                    P[l][k] = 1.0 / neighboursMap.get(triangulationPoints.get(k)).size();
                 } else {
-                    P[i][j] = 0;
+                    P[l][k] = 0;
                 }
             }
         }
